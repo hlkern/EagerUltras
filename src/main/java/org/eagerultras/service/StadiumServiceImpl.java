@@ -21,7 +21,7 @@ public class StadiumServiceImpl implements StadiumService {
     @Override
     public List<StadiumResponse> getAll() {
 
-        List<Stadium> list = stadiumRepository.findAll();
+        List<Stadium> list = stadiumRepository.findAllBy();
 
         list.forEach(s ->
                 log.info("RAW ENTITY => id={}, name={}", s.getId(), s.getName())
