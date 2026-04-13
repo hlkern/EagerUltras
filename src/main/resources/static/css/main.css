@@ -1,0 +1,257 @@
+:root {
+    --bg: #0b1021;
+    --card: rgba(18, 25, 51, 0.88);
+    --line: rgba(255, 255, 255, 0.14);
+    --text: #e8ecff;
+    --muted: #a5b1d8;
+    --accent: #ff7a18;
+    --accent-2: #ffb347;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Inter, Arial, sans-serif;
+    color: var(--text);
+    background: radial-gradient(1200px 900px at 20% 20%, #1e2950 0%, var(--bg) 45%), var(--bg);
+}
+
+.page-shell {
+    width: min(1040px, 92vw);
+    margin: 34px auto;
+    display: grid;
+    gap: 18px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 20px;
+    background: var(--card);
+}
+
+.tiny {
+    margin: 0;
+    letter-spacing: 0.16em;
+    color: var(--accent-2);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+h1 {
+    margin: 2px 0 0;
+}
+
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+.ghost {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    background: transparent;
+    cursor: pointer;
+}
+
+.welcome-card,
+.card,
+.country-card {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--card);
+}
+
+.welcome-card {
+    padding: 20px;
+}
+
+.welcome-card p,
+.card p {
+    color: var(--muted);
+}
+
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.card {
+    padding: 18px;
+}
+
+.country-card {
+    padding: 18px;
+}
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.section-head p {
+    color: var(--muted);
+    margin-bottom: 0;
+}
+
+.country-list {
+    display: grid;
+    gap: 10px;
+}
+
+.country-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.country-toggle {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.country-toggle:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.country-meta {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stadium-list {
+    display: none;
+    border-top: 1px solid var(--line);
+    padding: 6px 8px 10px;
+}
+
+.country-item.open .stadium-list {
+    display: grid;
+    gap: 6px;
+}
+
+.stadium-row {
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: rgba(0, 0, 0, 0.16);
+    font-size: 14px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr auto;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.stadium-row:hover {
+    border-color: rgba(255, 179, 71, 0.45);
+}
+
+.stadium-row.active {
+    border-color: rgba(255, 179, 71, 0.8);
+    background: rgba(255, 122, 24, 0.12);
+}
+
+.stadium-name {
+    font-weight: 700;
+}
+
+.stadium-team {
+    color: var(--muted);
+}
+
+.stadium-row .city {
+    color: var(--muted);
+    justify-self: end;
+}
+
+.detail-card {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--card);
+    padding: 18px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detail-grid div {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.detail-grid span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.detail-grid strong {
+    font-size: 14px;
+}
+
+.hidden {
+    display: none;
+}
+
+.empty,
+.error {
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--muted);
+}
+
+.error {
+    color: #ff9aa8;
+}
+
+@media (max-width: 860px) {
+    .grid-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .stadium-row {
+        grid-template-columns: 1fr;
+    }
+
+    .stadium-row .city {
+        justify-self: start;
+    }
+
+    .detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

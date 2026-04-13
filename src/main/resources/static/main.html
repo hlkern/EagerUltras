@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HoopAround | Main</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+<main class="page-shell">
+    <header class="topbar">
+        <div>
+            <p class="tiny">GROUNDHOOPERS APP</p>
+            <h1>HoopAround</h1>
+        </div>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+    </header>
+
+    <section class="welcome-card">
+        <h2 id="welcomeTitle">Welcome</h2>
+        <p>Your journey starts here.</p>
+    </section>
+
+    <section class="country-card">
+        <div class="section-head">
+            <h3>Countries / Leagues</h3>
+            <p>Pick a country to see its stadiums.</p>
+        </div>
+        <div id="countryList" class="country-list" aria-live="polite"></div>
+    </section>
+
+    <section id="stadiumDetail" class="detail-card hidden" aria-live="polite">
+        <h3>Stadium details</h3>
+        <div class="detail-grid">
+            <div><span>ID</span><strong id="detailId">-</strong></div>
+            <div><span>Name</span><strong id="detailName">-</strong></div>
+            <div><span>Teams</span><strong id="detailTeam">-</strong></div>
+            <div><span>City</span><strong id="detailCity">-</strong></div>
+            <div><span>Capacity</span><strong id="detailCapacity">-</strong></div>
+            <div><span>Country</span><strong id="detailCountry">-</strong></div>
+            <div><span>Latitude</span><strong id="detailLatitude">-</strong></div>
+            <div><span>Longitude</span><strong id="detailLongitude">-</strong></div>
+        </div>
+    </section>
+
+    <section class="grid-cards">
+        <article class="card">
+            <h3>Visited Stadiums</h3>
+            <p>Track where you have already been and build your route.</p>
+        </article>
+        <article class="card">
+            <h3>Next Goals</h3>
+            <p>Choose your next city and complete your groundhopping map.</p>
+        </article>
+        <article class="card">
+            <h3>Community</h3>
+            <p>Share your experience with other HoopAround fans.</p>
+        </article>
+    </section>
+</main>
+
+<script src="js/main.js"></script>
+</body>
+</html>

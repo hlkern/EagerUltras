@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HoopAround | Groundhoopers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+<div class="bg-glow"></div>
+<main class="auth-shell">
+    <section class="brand-panel">
+        <p class="tag">GROUNDHOOPERS APP</p>
+        <h1>HoopAround</h1>
+        <p class="subtitle">Track every stadium you visit, build your fan journey, and share your route with the community.</p>
+        <div class="badge-row">
+            <span class="badge">Stadium Tracker</span>
+            <span class="badge">Fan Journey</span>
+            <span class="badge">Community</span>
+        </div>
+    </section>
+
+    <section class="card-panel">
+        <div class="tabs" role="tablist" aria-label="Auth tabs">
+            <button id="loginTab" class="tab active" type="button" role="tab" aria-controls="loginForm">Login</button>
+            <button id="registerTab" class="tab" type="button" role="tab" aria-controls="registerForm">Register</button>
+        </div>
+
+        <div id="alertBox" class="alert hidden" aria-live="polite"></div>
+
+        <form id="loginForm" class="form active" autocomplete="on">
+            <h2>Welcome back</h2>
+            <label>
+                Email
+                <input id="loginEmail" type="email" placeholder="you@example.com" required />
+            </label>
+
+            <label>
+                Password
+                <input id="loginPassword" type="password" placeholder="Enter password" required />
+            </label>
+
+            <button id="loginBtn" class="primary" type="submit">Sign in</button>
+        </form>
+
+        <form id="registerForm" class="form" autocomplete="on">
+            <h2>Create account</h2>
+            <label>
+                Username
+                <input id="registerUsername" type="text" placeholder="groundhopper01" required minlength="3" />
+            </label>
+
+            <label>
+                Email
+                <input id="registerEmail" type="email" placeholder="you@example.com" required />
+            </label>
+
+            <label>
+                Password
+                <input id="registerPassword" type="password" placeholder="At least 6 chars" required minlength="6" />
+            </label>
+
+            <button id="registerBtn" class="primary" type="submit">Create account</button>
+        </form>
+    </section>
+</main>
+
+<script src="js/auth.js"></script>
+</body>
+</html>
+
