@@ -17,10 +17,22 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
 dependencies {
 
     // Spring Core & Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Request validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Password hashing (BCrypt)
+    implementation 'org.springframework.security:spring-security-crypto'
 
     // JPA / Hibernate
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -33,11 +45,14 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok:1.18.32'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
 tasks.named('test') {

@@ -16,3 +16,7 @@ spring:
   sql:
     init:
       mode: never
+
+server:
+  error:
+    include-message: always
