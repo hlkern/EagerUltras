@@ -1,20 +1,3 @@
-const SESSION_KEY = "hooparound_user";
-
-const rawUser = sessionStorage.getItem(SESSION_KEY);
-if (!rawUser) {
-    window.location.replace("/");
-}
-
-const hasValidShape = rawUser && rawUser.trim().startsWith("{") && rawUser.trim().endsWith("}");
-if (!hasValidShape) {
-    sessionStorage.removeItem(SESSION_KEY);
-    window.location.replace("/");
-}
-
-const user = JSON.parse(rawUser);
-
-const welcomeTitle = document.getElementById("welcomeTitle");
-const logoutBtn = document.getElementById("logoutBtn");
 const countryList = document.getElementById("countryList");
 const stadiumDetail = document.getElementById("stadiumDetail");
 let activeStadiumRow = null;
@@ -45,14 +28,11 @@ function groupByCountry(stadiums) {
         map.get(key).stadiums.push(stadium);
     });
 
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.values()).toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 function teamNames(stadium) {
-    return (stadium.teams || [])
-        .map((team) => team?.name)
-        .filter(Boolean)
-        .join(", ");
+    return (stadium.teams || []).map((team) => team?.name).filter(Boolean).join(", ");
 }
 
 function renderStadiumDetails(stadium) {
@@ -128,7 +108,7 @@ function createCountryItem(country, isOpen) {
     const list = document.createElement("div");
     list.className = "stadium-list";
     country.stadiums
-        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+        .toSorted((a, b) => (a.name || "").localeCompare(b.name || ""))
         .forEach((stadium) => list.appendChild(createStadiumRow(stadium)));
 
     button.addEventListener("click", () => {
@@ -139,7 +119,7 @@ function createCountryItem(country, isOpen) {
     return wrapper;
 }
 
-async function loadCountriesAndStadiums() {
+async function loadCountries() {
     if (!countryList) return;
 
     countryList.innerHTML = '<div class="empty">Loading countries...</div>';
@@ -149,13 +129,12 @@ async function loadCountriesAndStadiums() {
         const data = await response.json();
 
         if (!response.ok) {
-            const message = data?.message || data?.error || "Could not load stadiums.";
-            countryList.innerHTML = `<div class="error">${message}</div>`;
+            countryList.innerHTML = `<div class="error">${data?.message || data?.error || "Could not load countries."}</div>`;
             return;
         }
 
         if (!Array.isArray(data) || data.length === 0) {
-            countryList.innerHTML = '<div class="empty">No stadium data found.</div>';
+            countryList.innerHTML = '<div class="empty">No countries found.</div>';
             return;
         }
 
@@ -170,5 +149,5 @@ async function loadCountriesAndStadiums() {
 }
 
 if (window.HoopAroundLayout?.user) {
-    loadCountriesAndStadiums();
+    loadCountries();
 }

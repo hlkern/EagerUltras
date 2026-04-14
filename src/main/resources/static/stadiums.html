@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HoopAround | Stadiums</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body data-page="stadiums">
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+        <h3>HoopAround</h3>
+        <p>Groundhoopers app</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+    </nav>
+</aside>
+
+<main class="page-shell">
+    <header class="topbar">
+        <div class="topbar-left">
+            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <p class="tiny">GROUNDHOOPERS APP</p>
+                <h1>Stadiums</h1>
+            </div>
+        </div>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+    </header>
+
+    <section class="stadiums-card">
+        <div class="section-head">
+            <h3>All Stadiums</h3>
+            <p>Click a stadium for quick details.</p>
+        </div>
+        <div class="filter-row" role="group" aria-label="Stadium filters">
+            <button class="filter-btn active" type="button" data-filter="all">All</button>
+            <button class="filter-btn" type="button" data-filter="visited">Visited</button>
+            <button class="filter-btn" type="button" data-filter="not_visited">Not Visited</button>
+        </div>
+        <p id="stadiumsInfo" class="stadium-card-meta">Yukleniyor...</p>
+        <div id="stadiumsList" class="stadiums-list"></div>
+    </section>
+</main>
+
+<script src="/js/layout.js"></script>
+<script src="/js/stadiums.js"></script>
+</body>
+</html>
+

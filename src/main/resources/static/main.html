@@ -7,14 +7,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <style>
+        /* Fallback: hide sidebar even before main.css is loaded */
+        .sidebar { position: fixed; top: 0; left: 0; transform: translateX(-102%); }
+        .sidebar-overlay { opacity: 0; pointer-events: none; }
+        body.menu-open .sidebar { transform: translateX(0); }
+        body.menu-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
+    </style>
 </head>
-<body>
+<body data-page="home">
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+        <h3>HoopAround</h3>
+        <p>Groundhoopers app</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+    </nav>
+</aside>
+
 <main class="page-shell">
     <header class="topbar">
-        <div>
-            <p class="tiny">GROUNDHOOPERS APP</p>
-            <h1>HoopAround</h1>
+        <div class="topbar-left">
+            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <p class="tiny">GROUNDHOOPERS APP</p>
+                <h1>HoopAround</h1>
+            </div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
     </header>
@@ -24,7 +55,7 @@
         <p>Your journey starts here.</p>
     </section>
 
-    <section class="country-card">
+    <section id="countries" class="country-card">
         <div class="section-head">
             <h3>Countries / Leagues</h3>
             <p>Pick a country to see its stadiums.</p>
@@ -60,8 +91,56 @@
             <p>Share your experience with other HoopAround fans.</p>
         </article>
     </section>
+
+    <section class="match-form-card">
+        <div class="section-head">
+            <h3>Koleksiyona mac ekle</h3>
+            <p>Stadyum, takimlar, tarih-saat, puan ve yorum gir.</p>
+        </div>
+        <form id="matchForm" class="match-form">
+            <label>
+                Stadyum
+                <select id="matchStadiumId" required>
+                    <option value="">Stadyum sec</option>
+                </select>
+            </label>
+
+            <label>
+                Ev sahibi takim
+                <select id="matchHomeTeamId" required>
+                    <option value="">Takim sec</option>
+                </select>
+            </label>
+
+            <label>
+                Deplasman takim
+                <select id="matchAwayTeamId" required>
+                    <option value="">Takim sec</option>
+                </select>
+            </label>
+
+            <label>
+                Mac tarihi ve saati
+                <input id="matchAt" type="datetime-local" required />
+            </label>
+
+            <label>
+                Stadyum puani (1-10)
+                <input id="matchRating" type="number" min="1" max="10" />
+            </label>
+
+            <label class="full-width">
+                Yorum
+                <textarea id="matchComment" rows="3" placeholder="Mac deneyimini yaz..."></textarea>
+            </label>
+
+            <button id="matchSubmitBtn" class="ghost" type="submit">Maci koleksiyona ekle</button>
+        </form>
+        <p id="matchFormInfo" class="stadium-card-meta"></p>
+    </section>
 </main>
 
-<script src="js/main.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/main-page.js"></script>
 </body>
 </html>

@@ -9,9 +9,11 @@ import org.eagerultras.mapper.StadiumMapper;
 import org.eagerultras.repository.StadiumRepository;
 import org.eagerultras.repository.UserRepository;
 import org.eagerultras.repository.UserStadiumRepository;
-import org.eagerultras.request.StadiumVisitedRequest;
 import org.eagerultras.response.StadiumResponse;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,13 +27,10 @@ public class UserStadiumServiceImpl implements UserStadiumService {
     private final UserRepository userRepository;
     private final StadiumRepository stadiumRepository;
     private final UserStadiumRepository userStadiumRepository;
-    private final StadiumMapper  stadiumMapper;
+    private final StadiumMapper stadiumMapper;
 
     @Override
-    public void setAsVisited(StadiumVisitedRequest request) {
-
-        Long userId = request.getUserId();
-        Long stadiumId = request.getStadiumId();
+    public void setAsVisited(Long userId, Long stadiumId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
@@ -47,7 +46,7 @@ public class UserStadiumServiceImpl implements UserStadiumService {
 
         if (userStadiumRepository.existsByUserAndStadium(user, stadium)) {
             log.error("Stadium already visited. userId={}, stadiumId={}", userId, stadiumId);
-            throw new IllegalStateException("Stadium already visited");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Stadium already visited");
         }
 
         UserStadium userStadium = new UserStadium();
@@ -55,7 +54,12 @@ public class UserStadiumServiceImpl implements UserStadiumService {
         userStadium.setStadium(stadium);
         userStadium.setVisitDate(LocalDate.now());
 
-        userStadiumRepository.save(userStadium);
+        try {
+            userStadiumRepository.save(userStadium);
+        } catch (DataIntegrityViolationException ex) {
+            log.error("Duplicate visit prevented by DB. userId={}, stadiumId={}", userId, stadiumId);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Stadium already visited");
+        }
 
         log.info("Stadium marked as visited. userId={}, stadiumId={}", userId, stadiumId);
     }

@@ -1,6 +1,7 @@
 package org.eagerultras.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eagerultras.response.StadiumInsightsResponse;
 import org.eagerultras.response.StadiumResponse;
 import org.eagerultras.service.StadiumService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,11 @@ public class StadiumController {
     @GetMapping("/{id}")
     public StadiumResponse getStadiumById(@PathVariable Long id) {
         return stadiumService.getById(id);
+    }
+
+    @GetMapping("/{id}/insights")
+    public StadiumInsightsResponse getStadiumInsights(@PathVariable Long id) {
+        return stadiumService.getInsights(id);
     }
 
     @GetMapping("/debug")

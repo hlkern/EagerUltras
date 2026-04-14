@@ -1,0 +1,402 @@
+const collectionInfo = document.getElementById("collectionInfo");
+const collectionList = document.getElementById("collectionList");
+const teamSummaryInfo = document.getElementById("teamSummaryInfo");
+const teamSummaryList = document.getElementById("teamSummaryList");
+const stadiumSummaryInfo = document.getElementById("stadiumSummaryInfo");
+const stadiumSummaryList = document.getElementById("stadiumSummaryList");
+
+let collectionState = [];
+let activeEditMatchId = null;
+
+function getCurrentUserId() {
+    return window.HoopAroundLayout?.user?.id ?? null;
+}
+
+function formatMatchAt(matchAt) {
+    if (!matchAt) return "-";
+    const dt = new Date(matchAt);
+    if (Number.isNaN(dt.getTime())) return matchAt;
+    return dt.toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function getYear(matchAt) {
+    if (!matchAt) return null;
+    const dt = new Date(matchAt);
+    if (Number.isNaN(dt.getTime())) return null;
+    return dt.getFullYear();
+}
+
+function createSummaryCard(titleText, count, latestYear) {
+    const card = document.createElement("article");
+    card.className = "stadium-card-item";
+
+    const title = document.createElement("h4");
+    title.textContent = titleText;
+
+    const line1 = document.createElement("p");
+    line1.className = "stadium-card-meta";
+    line1.textContent = `${count} kez gidildi`;
+
+    const line2 = document.createElement("p");
+    line2.className = "stadium-card-meta";
+    line2.textContent = `Son gidilen yil: ${latestYear ?? "-"}`;
+
+    card.append(title, line1, line2);
+    return card;
+}
+
+function closeEditModal() {
+    const overlay = document.getElementById("matchEditOverlay");
+    if (overlay) {
+        overlay.remove();
+    }
+    activeEditMatchId = null;
+}
+
+function openEditModal(match) {
+    closeEditModal();
+
+    const overlay = document.createElement("div");
+    overlay.id = "matchEditOverlay";
+    overlay.className = "match-edit-overlay";
+
+    const modal = document.createElement("div");
+    modal.className = "match-edit-modal";
+
+    const title = document.createElement("h4");
+    title.textContent = `${match.homeTeam?.name || "Home"} vs ${match.awayTeam?.name || "Away"}`;
+
+    const sub = document.createElement("p");
+    sub.className = "stadium-card-meta";
+    sub.textContent = `${match.stadium?.name || "Unknown stadium"} | ${formatMatchAt(match.matchAt)}`;
+
+    const form = document.createElement("form");
+    form.className = "match-edit-form";
+
+    const ratingLabel = document.createElement("label");
+    ratingLabel.textContent = "Stadyum puani (1-10)";
+    const ratingInput = document.createElement("input");
+    ratingInput.type = "number";
+    ratingInput.min = "1";
+    ratingInput.max = "10";
+    ratingInput.value = match.stadiumRating ?? "";
+    ratingLabel.appendChild(ratingInput);
+
+    const commentLabel = document.createElement("label");
+    commentLabel.textContent = "Yorum";
+    const commentInput = document.createElement("textarea");
+    commentInput.rows = 4;
+    commentInput.value = match.comment || "";
+    commentLabel.appendChild(commentInput);
+
+    const status = document.createElement("p");
+    status.className = "stadium-card-meta";
+
+    const actions = document.createElement("div");
+    actions.className = "match-actions";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "ghost";
+    saveBtn.type = "submit";
+    saveBtn.textContent = "Kaydet";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "ghost";
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Iptal";
+
+    actions.append(saveBtn, cancelBtn);
+    form.append(ratingLabel, commentLabel, actions, status);
+    modal.append(title, sub, form);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    activeEditMatchId = match.id;
+
+    overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+            closeEditModal();
+        }
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        closeEditModal();
+    });
+
+    document.addEventListener("keydown", function onEsc(event) {
+        if (event.key === "Escape" && activeEditMatchId === match.id) {
+            closeEditModal();
+            document.removeEventListener("keydown", onEsc);
+        }
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const userId = getCurrentUserId();
+        if (!userId) {
+            status.textContent = "Kullanici bilgisi bulunamadi.";
+            return;
+        }
+
+        const ratingValue = ratingInput.value.trim();
+        let stadiumRating = null;
+        if (ratingValue) {
+            stadiumRating = Number.parseInt(ratingValue, 10);
+            if (Number.isNaN(stadiumRating) || stadiumRating < 1 || stadiumRating > 10) {
+                status.textContent = "Puan 1 ile 10 arasinda olmali.";
+                return;
+            }
+        }
+
+        const payload = {
+            stadiumRating,
+            comment: commentInput.value.trim() || null
+        };
+
+        saveBtn.disabled = true;
+        try {
+            const response = await fetch(`/api/users/${userId}/matches/${match.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => null);
+            if (!response.ok) {
+                status.textContent = data?.message || data?.error || "Mac guncellenemedi.";
+                return;
+            }
+
+            collectionState = collectionState.map((item) => (item.id === match.id ? data : item));
+            renderCollection(collectionState);
+            closeEditModal();
+        } catch (error) {
+            status.textContent = error.message || "Mac guncellenemedi.";
+        } finally {
+            saveBtn.disabled = false;
+        }
+    });
+}
+
+function createMatchCard(match) {
+    const card = document.createElement("article");
+    card.className = "stadium-card-item";
+
+    const title = document.createElement("h4");
+    title.textContent = `${match.homeTeam?.name || "Home"} vs ${match.awayTeam?.name || "Away"}`;
+
+    const line1 = document.createElement("p");
+    line1.className = "stadium-card-meta";
+    line1.textContent = `${match.stadium?.name || "Unknown stadium"} | ${match.stadium?.city || "City unknown"}`;
+
+    const line2 = document.createElement("p");
+    line2.className = "stadium-card-meta";
+    line2.textContent = `Tarih: ${formatMatchAt(match.matchAt)}`;
+
+    const line3 = document.createElement("p");
+    line3.className = "stadium-card-meta";
+    line3.textContent = `Puan: ${match.stadiumRating ?? "-"}`;
+
+    const line4 = document.createElement("p");
+    line4.className = "stadium-card-meta";
+    line4.textContent = `Yorum: ${match.comment || "-"}`;
+
+    const status = document.createElement("p");
+    status.className = "stadium-card-meta";
+
+    const actionRow = document.createElement("div");
+    actionRow.className = "match-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "ghost";
+    editBtn.type = "button";
+    editBtn.textContent = "Duzenle";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "ghost";
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "Sil";
+
+    actionRow.append(editBtn, deleteBtn);
+
+    editBtn.addEventListener("click", () => {
+        openEditModal(match);
+        status.textContent = "";
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+        const userId = getCurrentUserId();
+        if (!userId) {
+            status.textContent = "Kullanici bilgisi bulunamadi.";
+            return;
+        }
+
+        if (!window.confirm("Bu maci koleksiyondan silmek istiyor musun?")) {
+            return;
+        }
+
+        deleteBtn.disabled = true;
+        try {
+            const response = await fetch(`/api/users/${userId}/matches/${match.id}`, { method: "DELETE" });
+            if (!response.ok && response.status !== 204) {
+                const payload = await response.json().catch(() => null);
+                status.textContent = payload?.message || payload?.error || "Mac silinemedi.";
+                return;
+            }
+
+            collectionState = collectionState.filter((item) => item.id !== match.id);
+            renderCollection(collectionState);
+        } catch (error) {
+            status.textContent = error.message || "Mac silinemedi.";
+        } finally {
+            deleteBtn.disabled = false;
+        }
+    });
+
+    card.append(title, line1, line2, line3, line4, actionRow, status);
+    return card;
+}
+
+function renderTeamSummary(matches) {
+    if (!teamSummaryInfo || !teamSummaryList) return;
+
+    const summary = new Map();
+
+    matches.forEach((match) => {
+        const year = getYear(match.matchAt);
+        const teams = [match.homeTeam, match.awayTeam];
+
+        teams.forEach((team) => {
+            if (!team?.id) return;
+
+            const item = summary.get(team.id) || {
+                name: team.name || `Team #${team.id}`,
+                count: 0,
+                latestYear: null
+            };
+
+            item.count += 1;
+            if (year && (!item.latestYear || year > item.latestYear)) {
+                item.latestYear = year;
+            }
+
+            summary.set(team.id, item);
+        });
+    });
+
+    const rows = Array.from(summary.values()).toSorted((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+    teamSummaryList.innerHTML = "";
+    if (rows.length === 0) {
+        teamSummaryInfo.textContent = "Takim ozeti olusmadi.";
+        return;
+    }
+
+    teamSummaryInfo.textContent = `${rows.length} takim bulundu.`;
+    rows.forEach((row) => teamSummaryList.appendChild(createSummaryCard(row.name, row.count, row.latestYear)));
+}
+
+function renderStadiumSummary(matches) {
+    if (!stadiumSummaryInfo || !stadiumSummaryList) return;
+
+    const summary = new Map();
+
+    matches.forEach((match) => {
+        const stadium = match.stadium;
+        if (!stadium?.id) return;
+
+        const year = getYear(match.matchAt);
+        const item = summary.get(stadium.id) || {
+            name: stadium.name || `Stadium #${stadium.id}`,
+            count: 0,
+            latestYear: null
+        };
+
+        item.count += 1;
+        if (year && (!item.latestYear || year > item.latestYear)) {
+            item.latestYear = year;
+        }
+
+        summary.set(stadium.id, item);
+    });
+
+    const rows = Array.from(summary.values()).toSorted((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+    stadiumSummaryList.innerHTML = "";
+    if (rows.length === 0) {
+        stadiumSummaryInfo.textContent = "Stadyum ozeti olusmadi.";
+        return;
+    }
+
+    stadiumSummaryInfo.textContent = `${rows.length} stadyum bulundu.`;
+    rows.forEach((row) => stadiumSummaryList.appendChild(createSummaryCard(row.name, row.count, row.latestYear)));
+}
+
+function renderCollection(matches) {
+    if (!collectionInfo || !collectionList) return;
+
+    collectionList.innerHTML = "";
+
+    if (!Array.isArray(matches) || matches.length === 0) {
+        collectionInfo.textContent = "Henuz mac koleksiyonun bos.";
+        if (teamSummaryInfo) teamSummaryInfo.textContent = "Takim ozeti yok.";
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Stadyum ozeti yok.";
+        if (teamSummaryList) teamSummaryList.innerHTML = "";
+        if (stadiumSummaryList) stadiumSummaryList.innerHTML = "";
+        return;
+    }
+
+    collectionInfo.textContent = `${matches.length} mac listelendi.`;
+    matches.forEach((match) => collectionList.appendChild(createMatchCard(match)));
+
+    renderTeamSummary(matches);
+    renderStadiumSummary(matches);
+}
+
+async function loadCollection() {
+    if (!collectionList || !collectionInfo) return;
+
+    const userId = getCurrentUserId();
+    if (!userId) {
+        collectionInfo.textContent = "Kullanici bilgisi bulunamadi.";
+        if (teamSummaryInfo) teamSummaryInfo.textContent = "Kullanici bilgisi bulunamadi.";
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Kullanici bilgisi bulunamadi.";
+        return;
+    }
+
+    collectionInfo.textContent = "Yukleniyor...";
+    if (teamSummaryInfo) teamSummaryInfo.textContent = "Yukleniyor...";
+    if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Yukleniyor...";
+
+    try {
+        const response = await fetch(`/api/users/${userId}/matches`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            const message = data?.message || data?.error || "Mac koleksiyonu yuklenemedi.";
+            collectionInfo.textContent = message;
+            if (teamSummaryInfo) teamSummaryInfo.textContent = message;
+            if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
+            return;
+        }
+
+        collectionState = Array.isArray(data) ? data : [];
+        renderCollection(collectionState);
+    } catch (error) {
+        const message = error.message || "Mac koleksiyonu yuklenemedi.";
+        collectionInfo.textContent = message;
+        if (teamSummaryInfo) teamSummaryInfo.textContent = message;
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
+    }
+}
+
+if (window.HoopAroundLayout?.user) {
+    loadCollection();
+}
