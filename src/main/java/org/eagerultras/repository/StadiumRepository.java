@@ -16,4 +16,7 @@ public interface StadiumRepository extends JpaRepository<Stadium, Long> {
 
     @EntityGraph(attributePaths = {"country", "teams"})
     Optional<Stadium> findById(Long id);
+
+    @EntityGraph(attributePaths = {"country", "teams"})
+    List<Stadium> findTop8ByNameContainingIgnoreCaseOrderByNameAsc(String q);
 }

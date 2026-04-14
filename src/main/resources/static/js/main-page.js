@@ -9,10 +9,15 @@ const matchRating = document.getElementById("matchRating");
 const matchComment = document.getElementById("matchComment");
 const matchFormInfo = document.getElementById("matchFormInfo");
 const matchSubmitBtn = document.getElementById("matchSubmitBtn");
+const globalSearchInput = document.getElementById("globalSearchInput");
+const globalSearchResults = document.getElementById("globalSearchResults");
 
 let activeStadiumRow = null;
 let stadiumIndex = new Map();
 let allTeams = [];
+let searchDebounceId = null;
+let searchItemsCache = [];
+let activeSearchIndex = -1;
 
 const detailEls = {
     id: document.getElementById("detailId"),
@@ -24,6 +29,125 @@ const detailEls = {
     latitude: document.getElementById("detailLatitude"),
     longitude: document.getElementById("detailLongitude")
 };
+
+function hideSearchResults() {
+    if (!globalSearchResults) return;
+    globalSearchResults.classList.add("hidden");
+    globalSearchResults.innerHTML = "";
+    searchItemsCache = [];
+    activeSearchIndex = -1;
+}
+
+function goToSearchItem(item) {
+    if (item?.seoPath) {
+        window.location.href = item.seoPath;
+    }
+}
+
+function setActiveSearchIndex(nextIndex) {
+    if (!globalSearchResults) return;
+    const buttons = Array.from(globalSearchResults.querySelectorAll(".search-result-item"));
+    buttons.forEach((btn, idx) => btn.classList.toggle("active", idx === nextIndex));
+    activeSearchIndex = nextIndex;
+}
+
+function renderSearchResults(items) {
+    if (!globalSearchResults) return;
+
+    globalSearchResults.innerHTML = "";
+    searchItemsCache = Array.isArray(items) ? items : [];
+    activeSearchIndex = -1;
+
+    if (!Array.isArray(items) || items.length === 0) {
+        globalSearchResults.innerHTML = '<div class="empty">Sonuc bulunamadi.</div>';
+        globalSearchResults.classList.remove("hidden");
+        return;
+    }
+
+    items.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "search-result-item";
+        button.dataset.index = String(index);
+
+        const title = document.createElement("strong");
+        title.textContent = item.label || "Sonuc";
+
+        const meta = document.createElement("span");
+        meta.className = "search-result-meta";
+        meta.textContent = `${item.type || "ITEM"} | ${item.subtitle || "-"}`;
+
+        button.append(title, meta);
+        button.addEventListener("click", () => goToSearchItem(item));
+
+        globalSearchResults.appendChild(button);
+    });
+
+    globalSearchResults.classList.remove("hidden");
+}
+
+async function runSearch(query) {
+    if (!query || query.trim().length < 1) {
+        hideSearchResults();
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
+        const data = await response.json();
+        if (!response.ok) {
+            hideSearchResults();
+            return;
+        }
+        renderSearchResults(data);
+    } catch {
+        hideSearchResults();
+    }
+}
+
+function initGlobalSearch() {
+    if (!globalSearchInput || !globalSearchResults) return;
+
+    globalSearchInput.addEventListener("input", () => {
+        const query = globalSearchInput.value;
+        window.clearTimeout(searchDebounceId);
+        searchDebounceId = window.setTimeout(() => runSearch(query), 220);
+    });
+
+    globalSearchInput.addEventListener("keydown", async (event) => {
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            if (searchItemsCache.length === 0) return;
+            const next = activeSearchIndex < searchItemsCache.length - 1 ? activeSearchIndex + 1 : 0;
+            setActiveSearchIndex(next);
+            return;
+        }
+
+        if (event.key === "ArrowUp") {
+            event.preventDefault();
+            if (searchItemsCache.length === 0) return;
+            const next = activeSearchIndex > 0 ? activeSearchIndex - 1 : searchItemsCache.length - 1;
+            setActiveSearchIndex(next);
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            if (searchItemsCache.length === 0) {
+                await runSearch(globalSearchInput.value || "");
+            }
+            if (searchItemsCache.length === 0) return;
+            const selected = activeSearchIndex >= 0 ? activeSearchIndex : 0;
+            goToSearchItem(searchItemsCache[selected]);
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        if (event.target !== globalSearchInput && !globalSearchResults.contains(event.target)) {
+            hideSearchResults();
+        }
+    });
+}
 
 function groupByCountry(stadiums) {
     const map = new Map();
@@ -189,6 +313,7 @@ async function initMatchForm(stadiums) {
         });
 
     await loadAllTeams();
+    initGlobalSearch();
 
     fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
     fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
@@ -287,5 +412,6 @@ async function loadCountriesAndStadiums() {
 }
 
 if (window.HoopAroundLayout?.user) {
+    initGlobalSearch();
     loadCountriesAndStadiums();
 }

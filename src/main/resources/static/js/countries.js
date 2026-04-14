@@ -2,6 +2,18 @@ const countryList = document.getElementById("countryList");
 const stadiumDetail = document.getElementById("stadiumDetail");
 let activeStadiumRow = null;
 
+const requestedCountrySlug = new URLSearchParams(window.location.search).get("countrySlug");
+
+function toSlug(value) {
+    return String(value || "")
+        .toLocaleLowerCase("tr-TR")
+        .replace(/ı/g, "i")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+}
+
 const detailEls = {
     id: document.getElementById("detailId"),
     name: document.getElementById("detailName"),
@@ -140,9 +152,21 @@ async function loadCountries() {
 
         const countries = groupByCountry(data);
         countryList.innerHTML = "";
+
+        let requestedElement = null;
+
         countries.forEach((country, index) => {
-            countryList.appendChild(createCountryItem(country, index === 0));
+            const isRequested = requestedCountrySlug && toSlug(country.name) === requestedCountrySlug;
+            const item = createCountryItem(country, isRequested || (!requestedCountrySlug && index === 0));
+            if (isRequested) {
+                requestedElement = item;
+            }
+            countryList.appendChild(item);
         });
+
+        if (requestedElement) {
+            requestedElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
     } catch (error) {
         countryList.innerHTML = `<div class="error">${error.message || "Unexpected error"}</div>`;
     }

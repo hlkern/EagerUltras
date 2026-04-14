@@ -4,6 +4,18 @@ const filterButtons = document.querySelectorAll(".filter-btn");
 const visitedStadiumIds = new Set();
 const wishlistStadiumIds = new Set();
 
+const requestedStadiumSlug = new URLSearchParams(window.location.search).get("stadiumSlug");
+
+function toSlug(value) {
+    return String(value || "")
+        .toLocaleLowerCase("tr-TR")
+        .replace(/ı/g, "i")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+}
+
 let allStadiums = [];
 let currentFilter = "all";
 
@@ -307,6 +319,15 @@ function createStadiumCard(stadium) {
     });
 
     card.append(titleRow, line1, line2, line3, wishlistButton, insights.element);
+
+    if (requestedStadiumSlug && toSlug(stadium.name) === requestedStadiumSlug) {
+        card.classList.add("stadium-card-highlight");
+        setTimeout(async () => {
+            await insights.toggle();
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 0);
+    }
+
     return card;
 }
 

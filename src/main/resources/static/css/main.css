@@ -181,6 +181,59 @@ p {
     background: var(--card);
 }
 
+.search-wrap {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    padding: 10px;
+}
+
+.search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(11, 16, 33, 0.98);
+    z-index: 60;
+    max-height: 300px;
+    overflow: auto;
+    padding: 8px;
+    display: grid;
+    gap: 6px;
+}
+
+.search-result-item {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+    text-align: left;
+    padding: 10px;
+    cursor: pointer;
+    display: grid;
+    gap: 2px;
+}
+
+.search-result-item:hover,
+.search-result-item:focus {
+    border-color: rgba(255, 179, 71, 0.75);
+    background: rgba(255, 122, 24, 0.12);
+}
+
+.search-result-meta {
+    color: var(--muted);
+    font-size: 12px;
+}
+
 .welcome-card,
 .country-card,
 .detail-card,
@@ -317,6 +370,11 @@ p {
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.03);
     padding: 12px;
+}
+
+.stadium-card-highlight {
+    border-color: rgba(255, 179, 71, 0.9);
+    box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.45);
 }
 
 .stadium-card-item h4 {
