@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.eagerultras.repository.CountryRepository;
 import org.eagerultras.repository.StadiumRepository;
 import org.eagerultras.repository.TeamRepository;
+import org.eagerultras.repository.UserRepository;
 import org.eagerultras.response.SearchItemResponse;
 import org.eagerultras.util.SlugUtil;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class SearchServiceImpl implements SearchService {
     private final CountryRepository countryRepository;
     private final TeamRepository teamRepository;
     private final StadiumRepository stadiumRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<SearchItemResponse> search(String q) {
@@ -50,6 +52,13 @@ public class SearchServiceImpl implements SearchService {
                         toStadiumItem(stadium.getName(), stadium.getCountry() != null ? stadium.getCountry().getName() : "Stadyum"),
                         score(stadium.getName(), normalizedQuery),
                         stadium.getName()
+                )));
+
+        userRepository.findTop8ByUsernameContainingIgnoreCaseOrderByUsernameAsc(query)
+                .forEach(user -> candidates.add(new SearchCandidate(
+                        toUserItem(user.getUsername()),
+                        score(user.getUsername(), normalizedQuery),
+                        user.getUsername()
                 )));
 
         return candidates.stream()
@@ -85,6 +94,15 @@ public class SearchServiceImpl implements SearchService {
         item.setLabel(name);
         item.setSubtitle(subtitle);
         item.setSeoPath("/stadyum/" + SlugUtil.toSlug(name));
+        return item;
+    }
+
+    private SearchItemResponse toUserItem(String username) {
+        SearchItemResponse item = new SearchItemResponse();
+        item.setType("USER");
+        item.setLabel(username);
+        item.setSubtitle("Kullanici");
+        item.setSeoPath("/kullanici/" + username);
         return item;
     }
 

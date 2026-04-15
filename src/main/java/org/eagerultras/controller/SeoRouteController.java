@@ -43,4 +43,9 @@ public class SeoRouteController {
                 .map(country -> "redirect:/countries.html?countrySlug=" + slug)
                 .orElse("redirect:/main.html");
     }
+
+    @GetMapping("/kullanici/{username:[a-zA-Z0-9_.-]+}")
+    public String userPage(@PathVariable String username) {
+        return "redirect:/user-profile.html?username=" + username;
+    }
 }

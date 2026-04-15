@@ -3,6 +3,7 @@ package org.eagerultras.repository;
 import org.eagerultras.entity.Stadium;
 import org.eagerultras.entity.User;
 import org.eagerultras.entity.UserWishlistStadium;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +17,9 @@ public interface UserWishlistRepository extends JpaRepository<UserWishlistStadiu
 
     Optional<UserWishlistStadium> findByUserAndStadium(User user, Stadium stadium);
 
+    @EntityGraph(attributePaths = {"stadium", "stadium.country", "stadium.teams"})
     List<UserWishlistStadium> findAllByUserOrderByAddedAtDesc(User user);
 
+    @EntityGraph(attributePaths = {"stadium", "stadium.country", "stadium.teams"})
     Optional<UserWishlistStadium> findTopByUserOrderByAddedAtDesc(User user);
 }
