@@ -22,7 +22,7 @@ public class SeoRouteController {
         return teamRepository.findAll().stream()
                 .filter(team -> SlugUtil.toSlug(team.getName()).equals(slug))
                 .findFirst()
-                .map(team -> "redirect:/teams.html?teamSlug=" + slug)
+                .map(team -> "redirect:/team-detail.html?teamSlug=" + slug)
                 .orElse("redirect:/teams.html");
     }
 

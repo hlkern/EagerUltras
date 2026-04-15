@@ -376,6 +376,20 @@ p {
     padding: 12px;
 }
 
+.team-card {
+    cursor: pointer;
+}
+
+.team-card:hover {
+    border-color: rgba(255, 179, 71, 0.85);
+    background: rgba(255, 122, 24, 0.1);
+}
+
+.team-stadium-card {
+    display: grid;
+    gap: 8px;
+}
+
 .stadium-card-highlight {
     border-color: rgba(255, 179, 71, 0.9);
     box-shadow: 0 0 0 1px rgba(255, 179, 71, 0.45);

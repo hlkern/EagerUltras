@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HoopAround | Teams</title>
+    <title>HoopAround | Team Detail</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -11,8 +11,12 @@
 </head>
 <body data-page="teams">
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
 <aside id="sidebar" class="sidebar" aria-hidden="true">
-    <div class="sidebar-head"><h3>HoopAround</h3><p>Groundhoopers app</p></div>
+    <div class="sidebar-head">
+        <h3>HoopAround</h3>
+        <p>Groundhoopers app</p>
+    </div>
     <nav class="sidebar-nav">
         <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
         <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
@@ -22,25 +26,44 @@
         <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
     </nav>
 </aside>
+
 <main class="page-shell">
     <header class="topbar">
         <div class="topbar-left">
-            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-            <div><p class="tiny">GROUNDHOOPERS APP</p><h1>Takimlar</h1></div>
+            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <p class="tiny">GROUNDHOOPERS APP</p>
+                <h1 id="teamPageTitle">Takim detayi</h1>
+            </div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
     </header>
 
-    <section class="stadiums-card">
+    <section id="teamDetailCard" class="detail-card hidden">
         <div class="section-head">
-            <h3>All Teams</h3>
-            <p>Bir takima tikladiginda o takimin ozel sayfasina gidersin.</p>
+            <h3 id="teamName">-</h3>
+            <p id="teamCountry">-</p>
         </div>
-        <p id="teamsInfo" class="stadium-card-meta">Yukleniyor...</p>
-        <div id="teamsList" class="cards-grid"></div>
+
+        <div class="stadium-insights-block">
+            <h4>Kullandigi stadyumlar</h4>
+            <div id="teamStadiums" class="cards-grid"></div>
+        </div>
+    </section>
+
+    <section id="teamDetailError" class="card hidden">
+        <h3>Takim bulunamadi</h3>
+        <p>Bu linke ait takim bulunamadi. Takimlar sayfasindan tekrar deneyebilirsin.</p>
+        <a class="ghost" href="/teams.html">Takimlar sayfasina don</a>
     </section>
 </main>
+
 <script src="/js/layout.js"></script>
-<script src="/js/teams.js"></script>
+<script src="/js/team-detail.js"></script>
 </body>
 </html>
+
