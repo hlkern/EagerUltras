@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HoopAround | Stadium Detail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body data-page="stadiums">
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+        <h3>HoopAround</h3>
+        <p>Groundhoopers app</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+    </nav>
+</aside>
+
+<main class="page-shell">
+    <header class="topbar">
+        <div class="topbar-left">
+            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div>
+                <p class="tiny">GROUNDHOOPERS APP</p>
+                <h1 id="stadiumPageTitle">Stadyum detayi</h1>
+            </div>
+        </div>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+    </header>
+
+    <section id="stadiumDetailCard" class="detail-card hidden">
+        <div class="section-head">
+            <h3 id="stadiumName">-</h3>
+            <p id="stadiumCountryCity">-</p>
+        </div>
+
+        <div class="detail-grid detail-grid-3">
+            <div><span>Takimlar</span><strong id="stadiumTeams">-</strong></div>
+            <div><span>Kapasite</span><strong id="stadiumCapacity">-</strong></div>
+            <div><span>Konum</span><strong id="stadiumLocation">-</strong></div>
+        </div>
+
+        <div class="stadium-insights-block">
+            <h4>Ziyaretci yorumlari</h4>
+            <p id="stadiumRating" class="stadium-card-meta">Ortalama puan: -</p>
+            <div id="stadiumComments" class="stadium-comments"></div>
+        </div>
+    </section>
+
+    <section id="stadiumDetailError" class="card hidden">
+        <h3>Stadyum bulunamadi</h3>
+        <p>Bu linke ait stadyum bulunamadi. Stadlar sayfasindan tekrar deneyebilirsin.</p>
+        <a class="ghost" href="/stadiums.html">Stadlar sayfasina don</a>
+    </section>
+</main>
+
+<script src="/js/layout.js"></script>
+<script src="/js/stadium-detail.js"></script>
+</body>
+</html>
+

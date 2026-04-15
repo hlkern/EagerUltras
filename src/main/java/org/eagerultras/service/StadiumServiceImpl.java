@@ -9,6 +9,7 @@ import org.eagerultras.repository.StadiumRepository;
 import org.eagerultras.repository.UserMatchRepository;
 import org.eagerultras.response.StadiumInsightsResponse;
 import org.eagerultras.response.StadiumResponse;
+import org.eagerultras.util.SlugUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +43,19 @@ public class StadiumServiceImpl implements StadiumService {
         Stadium stadium = stadiumRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Stadium not found. id={}", id);
+                    return new IllegalArgumentException("Stadium not found");
+                });
+
+        return stadiumMapper.toResponse(stadium);
+    }
+
+    @Override
+    public StadiumResponse getBySlug(String slug) {
+        Stadium stadium = stadiumRepository.findAllBy().stream()
+                .filter(item -> SlugUtil.toSlug(item.getName()).equals(slug))
+                .findFirst()
+                .orElseThrow(() -> {
+                    log.error("Stadium not found. slug={}", slug);
                     return new IllegalArgumentException("Stadium not found");
                 });
 

@@ -11,5 +11,7 @@ public interface StadiumService {
 
     StadiumResponse getById(Long id);
 
+    StadiumResponse getBySlug(String slug);
+
     StadiumInsightsResponse getInsights(Long id);
 }

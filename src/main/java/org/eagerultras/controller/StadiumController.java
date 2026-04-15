@@ -22,6 +22,11 @@ public class StadiumController {
         return stadiumService.getAll();
     }
 
+    @GetMapping("/by-slug/{slug:[a-z0-9-]+}")
+    public StadiumResponse getStadiumBySlug(@PathVariable String slug) {
+        return stadiumService.getBySlug(slug);
+    }
+
     @GetMapping("/{id}")
     public StadiumResponse getStadiumById(@PathVariable Long id) {
         return stadiumService.getById(id);

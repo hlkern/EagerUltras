@@ -31,7 +31,7 @@ public class SeoRouteController {
         return stadiumRepository.findAllBy().stream()
                 .filter(stadium -> SlugUtil.toSlug(stadium.getName()).equals(slug))
                 .findFirst()
-                .map(stadium -> "redirect:/stadiums.html?stadiumSlug=" + slug)
+                .map(stadium -> "redirect:/stadium-detail.html?stadiumSlug=" + slug)
                 .orElse("redirect:/stadiums.html");
     }
 
@@ -44,4 +44,3 @@ public class SeoRouteController {
                 .orElse("redirect:/main.html");
     }
 }
-

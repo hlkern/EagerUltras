@@ -346,6 +346,10 @@ p {
     gap: 12px;
 }
 
+.detail-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .detail-grid div {
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -546,9 +550,19 @@ p {
     padding-top: 8px;
 }
 
+.stadium-insights-block {
+    margin-top: 14px;
+    border-top: 1px dashed var(--line);
+    padding-top: 12px;
+}
+
 .stadium-insights h5 {
     margin: 0 0 6px;
     font-size: 13px;
+}
+
+.stadium-insights-block h4 {
+    margin: 0 0 8px;
 }
 
 .stadium-insights p {
@@ -591,7 +605,8 @@ p {
         justify-self: start;
     }
 
-    .detail-grid {
+    .detail-grid,
+    .detail-grid-3 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
