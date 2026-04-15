@@ -75,7 +75,7 @@ public class UserWishlistServiceImpl implements UserWishlistService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        return userWishlistRepository.findAllByUser(user)
+        return userWishlistRepository.findAllByUserOrderByAddedAtDesc(user)
                 .stream()
                 .map(UserWishlistStadium::getStadium)
                 .map(stadiumMapper::toResponse)

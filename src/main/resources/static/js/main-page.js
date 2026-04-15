@@ -11,6 +11,10 @@ const matchFormInfo = document.getElementById("matchFormInfo");
 const matchSubmitBtn = document.getElementById("matchSubmitBtn");
 const globalSearchInput = document.getElementById("globalSearchInput");
 const globalSearchResults = document.getElementById("globalSearchResults");
+const latestVisitedCard = document.getElementById("latestVisitedCard");
+const latestVisitedText = document.getElementById("latestVisitedText");
+const latestWishlistCard = document.getElementById("latestWishlistCard");
+const latestWishlistText = document.getElementById("latestWishlistText");
 
 let activeStadiumRow = null;
 let stadiumIndex = new Map();
@@ -297,6 +301,93 @@ async function loadAllTeams() {
     }
 }
 
+function toSlug(value) {
+    return String(value || "")
+        .toLocaleLowerCase("tr-TR")
+        .replace(/ı/g, "i")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+}
+
+function formatMatchDate(value) {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return value;
+    return dt.toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function bindCardToStadium(cardEl, stadium) {
+    if (!cardEl || !stadium?.name) return;
+
+    cardEl.classList.add("card-link");
+    cardEl.onclick = () => {
+        window.location.href = `/stadyum/${toSlug(stadium.name)}`;
+    };
+}
+
+function resetDashboardCards() {
+    if (latestVisitedCard) {
+        latestVisitedCard.classList.remove("card-link");
+        latestVisitedCard.onclick = null;
+    }
+    if (latestWishlistCard) {
+        latestWishlistCard.classList.remove("card-link");
+        latestWishlistCard.onclick = null;
+    }
+}
+
+async function loadDashboardHighlights() {
+    const userId = window.HoopAroundLayout?.user?.id;
+    if (!userId) return;
+
+    resetDashboardCards();
+
+    try {
+        const response = await fetch(`/api/users/${userId}/dashboard-highlights`);
+        if (!response.ok) {
+            throw new Error("Highlights yuklenemedi");
+        }
+
+        const data = await response.json();
+
+        if (data?.latestVisitedStadium) {
+            const matchAtText = formatMatchDate(data.latestVisitedMatchAt);
+            if (latestVisitedText) {
+                latestVisitedText.textContent = `${data.latestVisitedStadium.name || "Bilinmeyen stad"} | ${matchAtText}`;
+            }
+            bindCardToStadium(latestVisitedCard, data.latestVisitedStadium);
+        } else if (latestVisitedText) {
+            latestVisitedText.textContent = "Henuz mac eklenmedi.";
+        }
+
+        if (data?.latestWishlistStadium) {
+            const city = data.latestWishlistStadium.city || "";
+            const cityPart = city ? ` | ${city}` : "";
+            if (latestWishlistText) {
+                latestWishlistText.textContent = `${data.latestWishlistStadium.name || "Bilinmeyen stad"}${cityPart}`;
+            }
+            bindCardToStadium(latestWishlistCard, data.latestWishlistStadium);
+        } else if (latestWishlistText) {
+            latestWishlistText.textContent = "Wishlist'e henuz stad eklenmedi.";
+        }
+    } catch {
+        if (latestVisitedText) {
+            latestVisitedText.textContent = "Son ziyaret bilgisi yuklenemedi.";
+        }
+        if (latestWishlistText) {
+            latestWishlistText.textContent = "Wishlist bilgisi yuklenemedi.";
+        }
+    }
+}
+
 async function initMatchForm(stadiums) {
     if (!matchForm || !matchStadiumId) return;
 
@@ -313,7 +404,6 @@ async function initMatchForm(stadiums) {
         });
 
     await loadAllTeams();
-    initGlobalSearch();
 
     fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
     fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
@@ -371,6 +461,7 @@ async function initMatchForm(stadiums) {
             matchForm.reset();
             fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
             fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
+            await loadDashboardHighlights();
         } catch (error) {
             if (matchFormInfo) matchFormInfo.textContent = error.message || "Mac koleksiyona eklenemedi.";
         } finally {
@@ -380,9 +471,11 @@ async function initMatchForm(stadiums) {
 }
 
 async function loadCountriesAndStadiums() {
-    if (!countryList) return;
+    const hasCountryList = !!countryList;
 
-    countryList.innerHTML = '<div class="empty">Loading countries...</div>';
+    if (hasCountryList) {
+        countryList.innerHTML = '<div class="empty">Loading countries...</div>';
+    }
 
     try {
         const response = await fetch("/api/stadiums");
@@ -390,28 +483,46 @@ async function loadCountriesAndStadiums() {
 
         if (!response.ok) {
             const message = data?.message || data?.error || "Could not load stadiums.";
-            countryList.innerHTML = `<div class="error">${message}</div>`;
+            if (hasCountryList) {
+                countryList.innerHTML = `<div class="error">${message}</div>`;
+            }
+            if (matchFormInfo) {
+                matchFormInfo.textContent = message;
+            }
             return;
         }
 
         if (!Array.isArray(data) || data.length === 0) {
-            countryList.innerHTML = '<div class="empty">No stadium data found.</div>';
+            if (hasCountryList) {
+                countryList.innerHTML = '<div class="empty">No stadium data found.</div>';
+            }
+            if (matchFormInfo) {
+                matchFormInfo.textContent = "Stadyum verisi bulunamadi.";
+            }
             return;
         }
 
-        const countries = groupByCountry(data);
-        countryList.innerHTML = "";
-        countries.forEach((country, index) => {
-            countryList.appendChild(createCountryItem(country, index === 0));
-        });
+        if (hasCountryList) {
+            const countries = groupByCountry(data);
+            countryList.innerHTML = "";
+            countries.forEach((country, index) => {
+                countryList.appendChild(createCountryItem(country, index === 0));
+            });
+        }
 
         initMatchForm(data);
     } catch (error) {
-        countryList.innerHTML = `<div class="error">${error.message || "Unexpected error"}</div>`;
+        if (hasCountryList) {
+            countryList.innerHTML = `<div class="error">${error.message || "Unexpected error"}</div>`;
+        }
+        if (matchFormInfo) {
+            matchFormInfo.textContent = error.message || "Stadyum verisi yuklenemedi.";
+        }
     }
 }
 
 if (window.HoopAroundLayout?.user) {
     initGlobalSearch();
     loadCountriesAndStadiums();
+    loadDashboardHighlights();
 }

@@ -16,5 +16,7 @@ public interface UserWishlistRepository extends JpaRepository<UserWishlistStadiu
 
     Optional<UserWishlistStadium> findByUserAndStadium(User user, Stadium stadium);
 
-    List<UserWishlistStadium> findAllByUser(User user);
+    List<UserWishlistStadium> findAllByUserOrderByAddedAtDesc(User user);
+
+    Optional<UserWishlistStadium> findTopByUserOrderByAddedAtDesc(User user);
 }

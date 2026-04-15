@@ -11,8 +11,11 @@ import java.util.Optional;
 @Repository
 public interface UserMatchRepository extends JpaRepository<UserMatch, Long> {
 
-    @EntityGraph(attributePaths = {"stadium", "stadium.country", "homeTeam", "awayTeam"})
+    @EntityGraph(attributePaths = {"stadium", "stadium.country", "stadium.teams", "homeTeam", "awayTeam"})
     List<UserMatch> findAllByUserIdOrderByMatchAtDesc(Long userId);
+
+    @EntityGraph(attributePaths = {"stadium", "stadium.country", "stadium.teams", "homeTeam", "awayTeam"})
+    Optional<UserMatch> findTopByUserIdOrderByMatchAtDesc(Long userId);
 
     @EntityGraph(attributePaths = {"stadium", "stadium.country", "homeTeam", "awayTeam"})
     Optional<UserMatch> findByIdAndUserId(Long id, Long userId);

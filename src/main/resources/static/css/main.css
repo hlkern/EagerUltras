@@ -602,6 +602,15 @@ p {
     font-size: 12px;
 }
 
+.card-link {
+    cursor: pointer;
+}
+
+.card-link:hover {
+    border-color: rgba(255, 179, 71, 0.85);
+    background: rgba(255, 122, 24, 0.1);
+}
+
 @media (max-width: 860px) {
     .grid-cards {
         grid-template-columns: 1fr;
