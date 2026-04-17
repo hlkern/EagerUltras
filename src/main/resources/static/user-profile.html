@@ -24,6 +24,7 @@
         <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
         <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
     </nav>
 </aside>
 
@@ -44,8 +45,27 @@
     </header>
 
     <section id="profileMain" class="card hidden">
-        <h3 id="profileUsername">-</h3>
-        <p class="stadium-card-meta">Gittigi maclar, puanlar, yorumlar ve wishlist</p>
+        <div class="profile-top-row">
+            <div>
+                <h3 id="profileUsername">-</h3>
+                <p class="stadium-card-meta">Gittigi maclar, puanlar, yorumlar ve wishlist</p>
+            </div>
+            <div class="profile-actions">
+                <button id="profileChatBtn" class="ghost" type="button">Sohbete git</button>
+                <button id="followActionBtn" class="ghost hidden" type="button"></button>
+                <p id="followActionInfo" class="stadium-card-meta hidden"></p>
+            </div>
+        </div>
+        <div class="profile-stats">
+            <div class="profile-stat-box">
+                <span>Takipci</span>
+                <strong id="profileFollowerCount">0</strong>
+            </div>
+            <div class="profile-stat-box">
+                <span>Takip edilen</span>
+                <strong id="profileFollowingCount">0</strong>
+            </div>
+        </div>
     </section>
 
     <section class="card">

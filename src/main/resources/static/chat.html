@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HoopAround | Wishlist</title>
+    <title>HoopAround | Sohbet</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css" />
 </head>
-<body data-page="wishlist">
+<body data-page="chat">
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
 <aside id="sidebar" class="sidebar" aria-hidden="true">
     <div class="sidebar-head"><h3>HoopAround</h3><p>Groundhoopers app</p></div>
     <nav class="sidebar-nav">
@@ -23,22 +24,49 @@
         <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
     </nav>
 </aside>
+
 <main class="page-shell">
     <header class="topbar">
         <div class="topbar-left">
             <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-            <div><p class="tiny">GROUNDHOOPERS APP</p><h1>Wishlist</h1></div>
+            <div><p class="tiny">GROUNDHOOPERS APP</p><h1>Sohbet</h1></div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
     </header>
 
-    <section class="placeholder-card">
-        <h3>Gitmek istedigim stadyumlar</h3>
-        <p id="wishlistInfo">Yukleniyor...</p>
-        <div id="wishlistList" class="cards-grid"></div>
+    <section class="card">
+        <h3>Yeni sohbet baslat</h3>
+        <div class="chat-new-row">
+            <div class="search-wrap">
+                <input id="chatUserSearchInput" class="search-input" type="text" placeholder="Kullanici adi ara" autocomplete="off" />
+                <div id="chatUserSearchResults" class="search-results hidden"></div>
+            </div>
+            <button id="chatStartBtn" class="ghost" type="button">Sohbet ac</button>
+        </div>
+        <p id="chatInfo" class="stadium-card-meta"></p>
+    </section>
+
+    <section class="chat-layout">
+        <article class="card">
+            <h3>Gecmis sohbetler</h3>
+            <div id="chatSummaryList" class="chat-summary-list"></div>
+        </article>
+
+        <article class="card">
+            <div class="chat-thread-head">
+                <h3 id="chatThreadTitle">Sohbet sec</h3>
+            </div>
+            <div id="chatMessages" class="chat-messages"></div>
+            <form id="chatSendForm" class="chat-send-form">
+                <textarea id="chatMessageInput" rows="3" placeholder="Mesaj yaz..." required></textarea>
+                <button id="chatSendBtn" class="ghost" type="submit">Gonder</button>
+            </form>
+        </article>
     </section>
 </main>
+
 <script src="/js/layout.js"></script>
-<script src="/js/wishlist.js"></script>
+<script src="/js/chat.js"></script>
 </body>
 </html>
+

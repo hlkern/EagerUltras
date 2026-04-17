@@ -5,6 +5,7 @@ import org.eagerultras.entity.User;
 import org.eagerultras.entity.UserMatch;
 import org.eagerultras.entity.UserWishlistStadium;
 import org.eagerultras.mapper.StadiumMapper;
+import org.eagerultras.repository.UserFollowRepository;
 import org.eagerultras.repository.UserMatchRepository;
 import org.eagerultras.repository.UserRepository;
 import org.eagerultras.repository.UserWishlistRepository;
@@ -24,10 +25,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserRepository userRepository;
     private final UserMatchRepository userMatchRepository;
     private final UserWishlistRepository userWishlistRepository;
+    private final UserFollowRepository userFollowRepository;
     private final StadiumMapper stadiumMapper;
 
     @Override
-    public UserProfileResponse getByUsername(String username) {
+    public UserProfileResponse getByUsername(String username, Long viewerUserId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -43,7 +45,18 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .toList();
 
         UserProfileResponse response = new UserProfileResponse();
+        response.setId(user.getId());
         response.setUsername(user.getUsername());
+        response.setFollowerCount(userFollowRepository.countByFollowingId(user.getId()));
+        response.setFollowingCount(userFollowRepository.countByFollowerId(user.getId()));
+
+        boolean ownProfile = viewerUserId != null && viewerUserId.equals(user.getId());
+        boolean followedByViewer = viewerUserId != null
+                && !ownProfile
+                && userFollowRepository.existsByFollowerIdAndFollowingId(viewerUserId, user.getId());
+
+        response.setOwnProfile(ownProfile);
+        response.setFollowedByViewer(followedByViewer);
         response.setMatches(matches);
         response.setWishlist(wishlist);
         return response;

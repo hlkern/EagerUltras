@@ -2,10 +2,19 @@ const profileMain = document.getElementById("profileMain");
 const profileError = document.getElementById("profileError");
 const profileTitle = document.getElementById("profileTitle");
 const profileUsername = document.getElementById("profileUsername");
+const profileFollowerCount = document.getElementById("profileFollowerCount");
+const profileFollowingCount = document.getElementById("profileFollowingCount");
+const followActionBtn = document.getElementById("followActionBtn");
+const followActionInfo = document.getElementById("followActionInfo");
+const profileChatBtn = document.getElementById("profileChatBtn");
 const profileMatches = document.getElementById("profileMatches");
 const profileRatings = document.getElementById("profileRatings");
 const profileComments = document.getElementById("profileComments");
 const profileWishlist = document.getElementById("profileWishlist");
+
+function getCurrentUserId() {
+    return window.HoopAroundLayout?.user?.id ?? null;
+}
 
 function toSlug(value) {
     return String(value || "")
@@ -123,9 +132,85 @@ function renderList(container, items, createCard, emptyText) {
     items.forEach((item) => container.appendChild(createCard(item)));
 }
 
+function renderFollowSummary(data) {
+    if (profileFollowerCount) {
+        profileFollowerCount.textContent = String(data.followerCount ?? 0);
+    }
+    if (profileFollowingCount) {
+        profileFollowingCount.textContent = String(data.followingCount ?? 0);
+    }
+}
+
+async function toggleFollow(data) {
+    const viewerUserId = getCurrentUserId();
+    if (!viewerUserId || !data?.id) return;
+
+    const isFollowing = !!data.followedByViewer;
+    const method = isFollowing ? "DELETE" : "POST";
+
+    followActionBtn.disabled = true;
+    followActionInfo.classList.add("hidden");
+
+    try {
+        const response = await fetch(`/api/user-follows/${viewerUserId}/${data.id}`, { method });
+        if (!(response.status === 204 || response.ok)) {
+            const payload = await response.json().catch(() => null);
+            followActionInfo.textContent = payload?.message || payload?.error || "Takip islemi basarisiz.";
+            followActionInfo.classList.remove("hidden");
+            return;
+        }
+
+        data.followedByViewer = !isFollowing;
+        data.followerCount = Number(data.followerCount || 0) + (data.followedByViewer ? 1 : -1);
+        if (data.followerCount < 0) data.followerCount = 0;
+        renderFollowSummary(data);
+        followActionBtn.textContent = data.followedByViewer ? "Takibi birak" : "Takip et";
+    } catch {
+        followActionInfo.textContent = "Takip islemi basarisiz.";
+        followActionInfo.classList.remove("hidden");
+    } finally {
+        followActionBtn.disabled = false;
+    }
+}
+
+function renderFollowActions(data) {
+    if (!followActionBtn || !followActionInfo) return;
+
+    const viewerUserId = getCurrentUserId();
+    const canFollow = !!viewerUserId && !data.ownProfile;
+
+    followActionInfo.classList.add("hidden");
+
+    if (!canFollow) {
+        followActionBtn.classList.add("hidden");
+        followActionBtn.onclick = null;
+        followActionInfo.textContent = data.ownProfile ? "Kendi profilin" : "Takip icin giris gerekli";
+        followActionInfo.classList.remove("hidden");
+        return;
+    }
+
+    followActionBtn.classList.remove("hidden");
+    followActionBtn.disabled = false;
+    followActionBtn.textContent = data.followedByViewer ? "Takibi birak" : "Takip et";
+    followActionBtn.onclick = () => toggleFollow(data);
+}
+
+function renderChatAction(data) {
+    if (!profileChatBtn) return;
+
+    const target = data?.ownProfile ? "/chat.html" : `/chat.html?username=${encodeURIComponent(data.username || "")}`;
+    profileChatBtn.onclick = () => {
+        window.location.href = target;
+    };
+}
+
 function renderProfile(data) {
     profileTitle.textContent = `${data.username} profili`;
     profileUsername.textContent = `@${data.username}`;
+
+    renderFollowSummary(data);
+    renderFollowActions(data);
+    renderChatAction(data);
 
     const matches = Array.isArray(data.matches) ? data.matches : [];
     const ratedMatches = matches.filter((match) => match.stadiumRating != null);
@@ -147,8 +232,11 @@ async function loadProfile() {
         return;
     }
 
+    const viewerUserId = getCurrentUserId();
+    const query = viewerUserId ? `?viewerUserId=${encodeURIComponent(viewerUserId)}` : "";
+
     try {
-        const response = await fetch(`/api/public/users/${encodeURIComponent(username)}`);
+        const response = await fetch(`/api/public/users/${encodeURIComponent(username)}${query}`);
         if (!response.ok) {
             profileError.classList.remove("hidden");
             return;

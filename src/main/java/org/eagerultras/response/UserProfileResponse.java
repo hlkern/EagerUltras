@@ -8,7 +8,12 @@ import java.util.List;
 @Data
 public class UserProfileResponse {
 
+    private Long id;
     private String username;
+    private Long followerCount;
+    private Long followingCount;
+    private boolean followedByViewer;
+    private boolean ownProfile;
     private List<MatchItem> matches;
     private List<StadiumResponse> wishlist;
 
@@ -23,4 +28,3 @@ public class UserProfileResponse {
         private String comment;
     }
 }
-

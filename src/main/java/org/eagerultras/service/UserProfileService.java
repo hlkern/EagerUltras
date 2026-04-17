@@ -4,6 +4,5 @@ import org.eagerultras.response.UserProfileResponse;
 
 public interface UserProfileService {
 
-    UserProfileResponse getByUsername(String username);
+    UserProfileResponse getByUsername(String username, Long viewerUserId);
 }
-
