@@ -195,8 +195,11 @@ function formatDate(value) {
 }
 
 async function fetchStadiumInsights(stadiumId) {
+    const viewerUserId = getCurrentUserId();
+    const query = viewerUserId ? `?viewerUserId=${encodeURIComponent(viewerUserId)}` : "";
+
     try {
-        const response = await fetch(`/api/stadiums/${stadiumId}/insights`);
+        const response = await fetch(`/api/stadiums/${stadiumId}/insights${query}`);
         const data = await response.json();
         if (!response.ok) {
             return null;
@@ -205,6 +208,79 @@ async function fetchStadiumInsights(stadiumId) {
     } catch {
         return null;
     }
+}
+
+async function saveCommentReaction(matchId, reaction) {
+    const userId = getCurrentUserId();
+    if (!userId || !matchId) {
+        return false;
+    }
+
+    const isRemoving = !reaction;
+    const url = `/api/users/${userId}/matches/${matchId}/reaction`;
+    const options = isRemoving
+        ? { method: "DELETE" }
+        : {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reaction })
+        };
+
+    try {
+        const response = await fetch(url, options);
+        return response.status === 204 || response.ok;
+    } catch {
+        return false;
+    }
+}
+
+function createReactionBar(comment) {
+    const bar = document.createElement("div");
+    bar.className = "comment-reaction-row";
+
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className = "comment-reaction-btn";
+
+    const dislikeBtn = document.createElement("button");
+    dislikeBtn.type = "button";
+    dislikeBtn.className = "comment-reaction-btn";
+
+    let current = comment.currentUserReaction || null;
+    let likes = Number(comment.likeCount || 0);
+    let dislikes = Number(comment.dislikeCount || 0);
+
+    const sync = () => {
+        likeBtn.textContent = `Like (${likes})`;
+        dislikeBtn.textContent = `Dislike (${dislikes})`;
+        likeBtn.classList.toggle("active", current === "LIKE");
+        dislikeBtn.classList.toggle("active", current === "DISLIKE");
+    };
+
+    const onReact = async (next) => {
+        const previous = current;
+        const target = previous === next ? null : next;
+        const changed = await saveCommentReaction(comment.matchId, target);
+        if (!changed) {
+            if (stadiumsInfo) stadiumsInfo.textContent = "Yorum reaksiyonu kaydedilemedi.";
+            return;
+        }
+
+        if (previous === "LIKE") likes -= 1;
+        if (previous === "DISLIKE") dislikes -= 1;
+        if (target === "LIKE") likes += 1;
+        if (target === "DISLIKE") dislikes += 1;
+        current = target;
+
+        sync();
+    };
+
+    likeBtn.addEventListener("click", () => onReact("LIKE"));
+    dislikeBtn.addEventListener("click", () => onReact("DISLIKE"));
+
+    sync();
+    bar.append(likeBtn, dislikeBtn);
+    return bar;
 }
 
 function createCommentItem(comment) {
@@ -219,6 +295,11 @@ function createCommentItem(comment) {
     meta.textContent = `${comment.username || "unknown"} | Puan: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
 
     item.append(text, meta);
+
+    if (comment.matchId) {
+        item.appendChild(createReactionBar(comment));
+    }
+
     return item;
 }
 

@@ -2,13 +2,16 @@ package org.eagerultras.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eagerultras.entity.ReactionType;
 import org.eagerultras.entity.Stadium;
 import org.eagerultras.entity.Team;
 import org.eagerultras.entity.User;
 import org.eagerultras.entity.UserMatch;
+import org.eagerultras.entity.UserMatchCommentReaction;
 import org.eagerultras.mapper.StadiumMapper;
 import org.eagerultras.repository.StadiumRepository;
 import org.eagerultras.repository.TeamRepository;
+import org.eagerultras.repository.UserMatchCommentReactionRepository;
 import org.eagerultras.repository.UserMatchRepository;
 import org.eagerultras.repository.UserRepository;
 import org.eagerultras.request.CreateUserMatchRequest;
@@ -33,6 +36,7 @@ public class UserMatchServiceImpl implements UserMatchService {
     private final StadiumRepository stadiumRepository;
     private final TeamRepository teamRepository;
     private final UserMatchRepository userMatchRepository;
+    private final UserMatchCommentReactionRepository userMatchCommentReactionRepository;
     private final StadiumMapper stadiumMapper;
 
     @Override
@@ -100,6 +104,42 @@ public class UserMatchServiceImpl implements UserMatchService {
         UserMatch userMatch = getOwnedMatch(userId, matchId);
         userMatchRepository.delete(userMatch);
         log.info("User match deleted. userId={}, matchId={}", userId, matchId);
+    }
+
+    @Override
+    public void setCommentReaction(Long userId, Long matchId, ReactionType reactionType) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        UserMatch userMatch = userMatchRepository.findById(matchId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Match not found"));
+
+        if (userMatch.getComment() == null || userMatch.getComment().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This match has no comment");
+        }
+
+        UserMatchCommentReaction reaction = userMatchCommentReactionRepository.findByUserAndUserMatch(user, userMatch)
+                .orElseGet(() -> {
+                    UserMatchCommentReaction item = new UserMatchCommentReaction();
+                    item.setUser(user);
+                    item.setUserMatch(userMatch);
+                    return item;
+                });
+
+        reaction.setReactionType(reactionType);
+        userMatchCommentReactionRepository.save(reaction);
+    }
+
+    @Override
+    public void removeCommentReaction(Long userId, Long matchId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        UserMatch userMatch = userMatchRepository.findById(matchId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Match not found"));
+
+        userMatchCommentReactionRepository.findByUserAndUserMatch(user, userMatch)
+                .ifPresent(userMatchCommentReactionRepository::delete);
     }
 
     private UserMatch getOwnedMatch(Long userId, Long matchId) {

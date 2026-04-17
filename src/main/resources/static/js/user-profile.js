@@ -3,6 +3,8 @@ const profileError = document.getElementById("profileError");
 const profileTitle = document.getElementById("profileTitle");
 const profileUsername = document.getElementById("profileUsername");
 const profileMatches = document.getElementById("profileMatches");
+const profileRatings = document.getElementById("profileRatings");
+const profileComments = document.getElementById("profileComments");
 const profileWishlist = document.getElementById("profileWishlist");
 
 function toSlug(value) {
@@ -44,15 +46,51 @@ function createMatchCard(match) {
     teams.className = "stadium-card-meta";
     teams.textContent = `${match.homeTeam?.name || "-"} vs ${match.awayTeam?.name || "-"}`;
 
-    const score = document.createElement("p");
-    score.className = "stadium-card-meta";
-    score.textContent = `Puan: ${match.stadiumRating ?? "-"} | Tarih: ${formatDate(match.matchAt)}`;
+    const date = document.createElement("p");
+    date.className = "stadium-card-meta";
+    date.textContent = `Tarih: ${formatDate(match.matchAt)}`;
+
+    card.append(title, teams, date);
+    card.addEventListener("click", () => goStadium(match.stadium));
+    return card;
+}
+
+function createRatingCard(match) {
+    const card = document.createElement("article");
+    card.className = "stadium-card-item card-link";
+
+    const title = document.createElement("h4");
+    title.textContent = match.stadium?.name || "Bilinmeyen stad";
+
+    const rating = document.createElement("p");
+    rating.className = "stadium-card-meta";
+    rating.textContent = `Puan: ${match.stadiumRating}`;
+
+    const date = document.createElement("p");
+    date.className = "stadium-card-meta";
+    date.textContent = `Mac tarihi: ${formatDate(match.matchAt)}`;
+
+    card.append(title, rating, date);
+    card.addEventListener("click", () => goStadium(match.stadium));
+    return card;
+}
+
+function createCommentCard(match) {
+    const card = document.createElement("article");
+    card.className = "stadium-card-item card-link";
+
+    const title = document.createElement("h4");
+    title.textContent = match.stadium?.name || "Bilinmeyen stad";
 
     const comment = document.createElement("p");
     comment.className = "stadium-card-meta";
-    comment.textContent = `Yorum: ${match.comment || "-"}`;
+    comment.textContent = match.comment || "-";
 
-    card.append(title, teams, score, comment);
+    const date = document.createElement("p");
+    date.className = "stadium-card-meta";
+    date.textContent = `Mac tarihi: ${formatDate(match.matchAt)}`;
+
+    card.append(title, comment, date);
     card.addEventListener("click", () => goStadium(match.stadium));
     return card;
 }
@@ -73,25 +111,30 @@ function createWishlistCard(stadium) {
     return card;
 }
 
+function renderList(container, items, createCard, emptyText) {
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = `<div class="empty">${emptyText}</div>`;
+        return;
+    }
+
+    items.forEach((item) => container.appendChild(createCard(item)));
+}
+
 function renderProfile(data) {
     profileTitle.textContent = `${data.username} profili`;
     profileUsername.textContent = `@${data.username}`;
 
-    profileMatches.innerHTML = "";
     const matches = Array.isArray(data.matches) ? data.matches : [];
-    if (matches.length === 0) {
-        profileMatches.innerHTML = '<div class="empty">Bu kullanicinin mac kaydi yok.</div>';
-    } else {
-        matches.forEach((match) => profileMatches.appendChild(createMatchCard(match)));
-    }
+    const ratedMatches = matches.filter((match) => match.stadiumRating != null);
+    const commentedMatches = matches.filter((match) => !!String(match.comment || "").trim());
 
-    profileWishlist.innerHTML = "";
-    const wishlist = Array.isArray(data.wishlist) ? data.wishlist : [];
-    if (wishlist.length === 0) {
-        profileWishlist.innerHTML = '<div class="empty">Wishlist bos.</div>';
-    } else {
-        wishlist.forEach((stadium) => profileWishlist.appendChild(createWishlistCard(stadium)));
-    }
+    renderList(profileMatches, matches, createMatchCard, "Bu kullanicinin mac kaydi yok.");
+    renderList(profileRatings, ratedMatches, createRatingCard, "Bu kullanici henuz puan vermemis.");
+    renderList(profileComments, commentedMatches, createCommentCard, "Bu kullanici henuz yorum yazmamis.");
+    renderList(profileWishlist, data.wishlist, createWishlistCard, "Wishlist bos.");
 
     profileMain.classList.remove("hidden");
     profileError.classList.add("hidden");
@@ -119,4 +162,3 @@ async function loadProfile() {
 }
 
 loadProfile();
-

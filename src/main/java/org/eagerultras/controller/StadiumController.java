@@ -33,8 +33,9 @@ public class StadiumController {
     }
 
     @GetMapping("/{id}/insights")
-    public StadiumInsightsResponse getStadiumInsights(@PathVariable Long id) {
-        return stadiumService.getInsights(id);
+    public StadiumInsightsResponse getStadiumInsights(@PathVariable Long id,
+                                                      @RequestParam(name = "viewerUserId", required = false) Long viewerUserId) {
+        return stadiumService.getInsights(id, viewerUserId);
     }
 
     @GetMapping("/debug")

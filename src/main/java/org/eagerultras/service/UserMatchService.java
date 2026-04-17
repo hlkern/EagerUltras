@@ -1,5 +1,6 @@
 package org.eagerultras.service;
 
+import org.eagerultras.entity.ReactionType;
 import org.eagerultras.request.CreateUserMatchRequest;
 import org.eagerultras.request.UpdateUserMatchRequest;
 import org.eagerultras.response.UserMatchResponse;
@@ -15,4 +16,8 @@ public interface UserMatchService {
     UserMatchResponse update(Long userId, Long matchId, UpdateUserMatchRequest request);
 
     void delete(Long userId, Long matchId);
+
+    void setCommentReaction(Long userId, Long matchId, ReactionType reactionType);
+
+    void removeCommentReaction(Long userId, Long matchId);
 }

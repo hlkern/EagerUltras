@@ -14,10 +14,13 @@ public class StadiumInsightsResponse {
 
     @Data
     public static class CommentItem {
+        private Long matchId;
         private String username;
         private String comment;
         private Short rating;
         private LocalDateTime matchAt;
+        private Integer likeCount;
+        private Integer dislikeCount;
+        private String currentUserReaction;
     }
 }
-

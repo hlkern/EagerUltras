@@ -3,6 +3,7 @@ package org.eagerultras.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.eagerultras.request.CreateUserMatchRequest;
+import org.eagerultras.request.SetUserMatchReactionRequest;
 import org.eagerultras.request.UpdateUserMatchRequest;
 import org.eagerultras.response.UserMatchResponse;
 import org.eagerultras.service.UserMatchService;
@@ -49,5 +50,20 @@ public class UserMatchController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long userId, @PathVariable Long matchId) {
         userMatchService.delete(userId, matchId);
+    }
+
+    @PutMapping("/{matchId}/reaction")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setReaction(@PathVariable Long userId,
+                            @PathVariable Long matchId,
+                            @Valid @RequestBody SetUserMatchReactionRequest request) {
+        userMatchService.setCommentReaction(userId, matchId, request.getReaction());
+    }
+
+    @DeleteMapping("/{matchId}/reaction")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeReaction(@PathVariable Long userId,
+                               @PathVariable Long matchId) {
+        userMatchService.removeCommentReaction(userId, matchId);
     }
 }

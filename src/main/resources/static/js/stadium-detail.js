@@ -9,6 +9,10 @@ const stadiumLocation = document.getElementById("stadiumLocation");
 const stadiumRating = document.getElementById("stadiumRating");
 const stadiumComments = document.getElementById("stadiumComments");
 
+function getCurrentUserId() {
+    return window.HoopAroundLayout?.user?.id ?? null;
+}
+
 function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
@@ -27,6 +31,77 @@ function renderTeams(stadium) {
     return names.length > 0 ? names.join(", ") : "-";
 }
 
+ async function saveCommentReaction(matchId, reaction) {
+    const userId = getCurrentUserId();
+    if (!userId || !matchId) {
+        return false;
+    }
+
+    const isRemoving = !reaction;
+    const url = `/api/users/${userId}/matches/${matchId}/reaction`;
+    const options = isRemoving
+        ? { method: "DELETE" }
+        : {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reaction })
+        };
+
+    try {
+        const response = await fetch(url, options);
+        return response.status === 204 || response.ok;
+    } catch {
+        return false;
+    }
+}
+
+function createReactionBar(comment) {
+    const bar = document.createElement("div");
+    bar.className = "comment-reaction-row";
+
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className = "comment-reaction-btn";
+
+    const dislikeBtn = document.createElement("button");
+    dislikeBtn.type = "button";
+    dislikeBtn.className = "comment-reaction-btn";
+
+    let current = comment.currentUserReaction || null;
+    let likes = Number(comment.likeCount || 0);
+    let dislikes = Number(comment.dislikeCount || 0);
+
+    const sync = () => {
+        likeBtn.textContent = `Like (${likes})`;
+        dislikeBtn.textContent = `Dislike (${dislikes})`;
+        likeBtn.classList.toggle("active", current === "LIKE");
+        dislikeBtn.classList.toggle("active", current === "DISLIKE");
+    };
+
+    const onReact = async (next) => {
+        const previous = current;
+        const target = previous === next ? null : next;
+        const changed = await saveCommentReaction(comment.matchId, target);
+        if (!changed) {
+            return;
+        }
+
+        if (previous === "LIKE") likes -= 1;
+        if (previous === "DISLIKE") dislikes -= 1;
+        if (target === "LIKE") likes += 1;
+        if (target === "DISLIKE") dislikes += 1;
+        current = target;
+        sync();
+    };
+
+    likeBtn.addEventListener("click", () => onReact("LIKE"));
+    dislikeBtn.addEventListener("click", () => onReact("DISLIKE"));
+
+    sync();
+    bar.append(likeBtn, dislikeBtn);
+    return bar;
+}
+
 function renderCommentItem(comment) {
     const item = document.createElement("div");
     item.className = "stadium-comment-item";
@@ -39,6 +114,11 @@ function renderCommentItem(comment) {
     meta.textContent = `${comment.username || "unknown"} | Puan: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
 
     item.append(text, meta);
+
+    if (comment.matchId) {
+        item.appendChild(createReactionBar(comment));
+    }
+
     return item;
 }
 
@@ -99,9 +179,10 @@ async function loadStadiumDetail() {
         return;
     }
 
-    const insights = await fetchJsonOrNull(`/api/stadiums/${stadium.id}/insights`);
+    const viewerUserId = getCurrentUserId();
+    const query = viewerUserId ? `?viewerUserId=${encodeURIComponent(viewerUserId)}` : "";
+    const insights = await fetchJsonOrNull(`/api/stadiums/${stadium.id}/insights${query}`);
     renderStadium(stadium, insights || {});
 }
 
 loadStadiumDetail();
-
