@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HoopAround | Harita</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <style>
+        .sidebar { position: fixed; top: 0; left: 0; transform: translateX(-102%); }
+        .sidebar-overlay { opacity: 0; pointer-events: none; }
+        body.menu-open .sidebar { transform: translateX(0); }
+        body.menu-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
+
+        #map {
+            width: 100%;
+            height: calc(100vh - 130px);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot--visited  { background: #ff7a18; border: 2px solid #ffb347; }
+        .legend-dot--wishlist { background: #7ab8ff; border: 2px solid #a0d0ff; }
+        .legend-dot--other    { background: #4a5280; border: 2px solid #6370a8; }
+
+        .map-filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Stadium detail modal */
+        .stadium-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .stadium-modal-overlay.open {
+            display: flex;
+        }
+        .stadium-modal {
+            background: var(--card-bg, #1a1d2e);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 28px 28px 24px;
+            position: relative;
+        }
+        .stadium-modal-close {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: none;
+            border: none;
+            color: var(--muted, #888);
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .stadium-modal-close:hover { color: #fff; }
+        .stadium-modal h2 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .stadium-modal .sm-meta {
+            font-size: 13px;
+            color: var(--muted, #888);
+            margin-bottom: 16px;
+        }
+        .stadium-modal .sm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stadium-modal .sm-grid > div {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+        .stadium-modal .sm-grid span {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--muted, #888);
+            margin-bottom: 4px;
+        }
+        .stadium-modal .sm-grid strong {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .stadium-modal .sm-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .sm-status--visited  { background: rgba(255,122,24,.18); color: #ff7a18; }
+        .sm-status--wishlist { background: rgba(122,184,255,.18); color: #7ab8ff; }
+        .stadium-modal .sm-comments-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 8px;
+            color: var(--muted, #888);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .sm-comment-item {
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 10px 0;
+            font-size: 13px;
+        }
+        .sm-comment-item .sm-comment-text { margin: 0 0 4px; }
+        .sm-comment-item .sm-comment-meta { color: var(--muted, #888); font-size: 11px; }
+        .stadium-modal .sm-full-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            color: inherit;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background .15s;
+        }
+        .stadium-modal .sm-full-link:hover { background: rgba(255,255,255,0.12); }
+
+        .sm-wishlist-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 14px;
+            background: rgba(122,184,255,0.08);
+            border: 1px solid rgba(122,184,255,0.25);
+            border-radius: 10px;
+            color: #7ab8ff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, border-color .15s;
+        }
+        .sm-wishlist-btn:hover { background: rgba(122,184,255,0.18); }
+        .sm-wishlist-btn--active {
+            background: rgba(122,184,255,0.18);
+            border-color: #7ab8ff;
+            color: #fff;
+        }
+        .sm-wishlist-btn:disabled { opacity: .5; cursor: default; }
+    </style>
+</head>
+<body data-page="map">
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+        <h3>HoopAround</h3>
+        <p>Groundhoopers app</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/main.html"           class="sidebar-link" data-nav="home">Ana sayfa</a>
+        <a href="/countries.html"      class="sidebar-link" data-nav="countries">Ulkeler</a>
+        <a href="/stadiums.html"       class="sidebar-link" data-nav="stadiums">Stadlar</a>
+        <a href="/teams.html"          class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/wishlist.html"       class="sidebar-link" data-nav="wishlist">Wishlist</a>
+        <a href="/collection.html"     class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Mac Ekle</a>
+        <a href="/map.html"            class="sidebar-link" data-nav="map">Harita</a>
+        <a href="/chat.html"           class="sidebar-link" data-nav="chat">Sohbet</a>
+    </nav>
+</aside>
+
+<main class="page-shell">
+    <header class="topbar">
+        <div class="topbar-left">
+            <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <div>
+                <p class="tiny">GROUNDHOOPERS APP</p>
+                <h1>HoopAround</h1>
+            </div>
+        </div>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+    </header>
+
+    <div class="map-legend">
+        <span class="legend-item"><span class="legend-dot legend-dot--visited"></span> Ziyaret ettim</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--wishlist"></span> Wishlist'imde</span>
+        <span class="legend-item"><span class="legend-dot legend-dot--other"></span> Diger stadlar</span>
+    </div>
+
+    <div class="map-filter-row">
+        <button type="button" class="filter-btn active" data-filter="all">Tumu</button>
+        <button type="button" class="filter-btn" data-filter="visited">Ziyaret ettiklerim</button>
+        <button type="button" class="filter-btn" data-filter="wishlist">Wishlist</button>
+    </div>
+
+    <p id="mapInfo" class="stadium-card-meta" style="margin-bottom:8px;"></p>
+    <div id="map"></div>
+</main>
+
+<!-- Stadium detail modal -->
+<div id="stadiumModalOverlay" class="stadium-modal-overlay" onclick="if(event.target===this)closeStadiumModal()">
+    <div class="stadium-modal">
+        <button class="stadium-modal-close" onclick="closeStadiumModal()" aria-label="Kapat">✕</button>
+        <div id="smContent">
+            <p style="color:var(--muted,#888);text-align:center;padding:30px 0;">Yükleniyor…</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="/js/layout.js"></script>
+<script src="/js/map.js"></script>
+</body>
+</html>

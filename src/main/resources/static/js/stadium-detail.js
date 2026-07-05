@@ -167,13 +167,18 @@ async function fetchJsonOrNull(url) {
 }
 
 async function loadStadiumDetail() {
-    const slug = new URLSearchParams(window.location.search).get("stadiumSlug");
-    if (!slug) {
-        showError();
-        return;
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get("stadiumSlug");
+    const idParam = params.get("stadiumId");
+
+    let stadium = null;
+
+    if (idParam) {
+        stadium = await fetchJsonOrNull(`/api/stadiums/${encodeURIComponent(idParam)}`);
+    } else if (slug) {
+        stadium = await fetchJsonOrNull(`/api/stadiums/by-slug/${encodeURIComponent(slug)}`);
     }
 
-    const stadium = await fetchJsonOrNull(`/api/stadiums/by-slug/${encodeURIComponent(slug)}`);
     if (!stadium?.id) {
         showError();
         return;
