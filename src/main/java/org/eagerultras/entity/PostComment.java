@@ -15,30 +15,26 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_messages")
+@Table(name = "post_comments")
 @Data
-public class UserMessage {
+public class PostComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "conversation_id", nullable = false)
-    private UserConversation conversation;
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
-    @Column(name = "content", nullable = false, length = 2000)
+    @Column(name = "content", nullable = false, length = 1000)
     private String content;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "read_at")
-    private LocalDateTime readAt;
 }
-

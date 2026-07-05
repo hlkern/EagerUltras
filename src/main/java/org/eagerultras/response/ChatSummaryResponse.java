@@ -11,5 +11,6 @@ public class ChatSummaryResponse {
     private String otherUsername;
     private String lastMessage;
     private LocalDateTime lastMessageAt;
+    private int unreadCount;
 }
 

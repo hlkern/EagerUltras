@@ -1,14 +1,3 @@
-const countryList = document.getElementById("countryList");
-const stadiumDetail = document.getElementById("stadiumDetail");
-const matchForm = document.getElementById("matchForm");
-const matchStadiumId = document.getElementById("matchStadiumId");
-const matchHomeTeamId = document.getElementById("matchHomeTeamId");
-const matchAwayTeamId = document.getElementById("matchAwayTeamId");
-const matchAt = document.getElementById("matchAt");
-const matchRating = document.getElementById("matchRating");
-const matchComment = document.getElementById("matchComment");
-const matchFormInfo = document.getElementById("matchFormInfo");
-const matchSubmitBtn = document.getElementById("matchSubmitBtn");
 const globalSearchInput = document.getElementById("globalSearchInput");
 const globalSearchResults = document.getElementById("globalSearchResults");
 const latestVisitedCard = document.getElementById("latestVisitedCard");
@@ -16,23 +5,10 @@ const latestVisitedText = document.getElementById("latestVisitedText");
 const latestWishlistCard = document.getElementById("latestWishlistCard");
 const latestWishlistText = document.getElementById("latestWishlistText");
 
-let activeStadiumRow = null;
-let stadiumIndex = new Map();
-let allTeams = [];
 let searchDebounceId = null;
 let searchItemsCache = [];
 let activeSearchIndex = -1;
-
-const detailEls = {
-    id: document.getElementById("detailId"),
-    name: document.getElementById("detailName"),
-    team: document.getElementById("detailTeam"),
-    city: document.getElementById("detailCity"),
-    capacity: document.getElementById("detailCapacity"),
-    country: document.getElementById("detailCountry"),
-    latitude: document.getElementById("detailLatitude"),
-    longitude: document.getElementById("detailLongitude")
-};
+let postPreviewUrl = null;
 
 function hideSearchResults() {
     if (!globalSearchResults) return;
@@ -153,154 +129,6 @@ function initGlobalSearch() {
     });
 }
 
-function groupByCountry(stadiums) {
-    const map = new Map();
-
-    stadiums.forEach((stadium) => {
-        const country = stadium.country || {};
-        const key = country.id || country.code || country.name || "unknown";
-        const name = country.name || "Unknown country";
-
-        if (!map.has(key)) {
-            map.set(key, { name, code: country.code || "-", stadiums: [] });
-        }
-
-        map.get(key).stadiums.push(stadium);
-    });
-
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function teamNames(stadium) {
-    return (stadium.teams || [])
-        .map((team) => team?.name)
-        .filter(Boolean)
-        .join(", ");
-}
-
-function renderStadiumDetails(stadium) {
-    if (!stadiumDetail) return;
-
-    detailEls.id.textContent = stadium.id ?? "-";
-    detailEls.name.textContent = stadium.name || "-";
-    detailEls.team.textContent = teamNames(stadium) || "-";
-    detailEls.city.textContent = stadium.city || "-";
-    detailEls.capacity.textContent = stadium.capacity ?? "-";
-    detailEls.country.textContent = stadium.country?.name || "-";
-    detailEls.latitude.textContent = stadium.latitude ?? "-";
-    detailEls.longitude.textContent = stadium.longitude ?? "-";
-
-    stadiumDetail.classList.remove("hidden");
-}
-
-async function fetchStadiumDetails(stadiumId) {
-    try {
-        const response = await fetch(`/api/stadiums/${stadiumId}`);
-        const data = await response.json();
-        if (!response.ok) {
-            return null;
-        }
-        return data;
-    } catch {
-        return null;
-    }
-}
-
-function createStadiumRow(stadium) {
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "stadium-row";
-
-    const left = document.createElement("span");
-    left.className = "stadium-name";
-    left.textContent = stadium.name || "Unnamed stadium";
-
-    const team = document.createElement("span");
-    team.className = "stadium-team";
-    team.textContent = teamNames(stadium) || "Team unknown";
-
-    const city = document.createElement("span");
-    city.className = "city";
-    city.textContent = stadium.city || "City unknown";
-
-    row.append(left, team, city);
-
-    row.addEventListener("click", async () => {
-        if (activeStadiumRow) {
-            activeStadiumRow.classList.remove("active");
-        }
-        activeStadiumRow = row;
-        row.classList.add("active");
-
-        const detailedStadium = (await fetchStadiumDetails(stadium.id)) || stadium;
-        renderStadiumDetails(detailedStadium);
-    });
-
-    return row;
-}
-
-function createCountryItem(country, isOpen) {
-    const wrapper = document.createElement("article");
-    wrapper.className = `country-item ${isOpen ? "open" : ""}`;
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "country-toggle";
-    button.innerHTML = `<span>${country.name}</span><span class="country-meta">${country.code} | ${country.stadiums.length} stadium</span>`;
-
-    const list = document.createElement("div");
-    list.className = "stadium-list";
-    country.stadiums
-        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-        .forEach((stadium) => list.appendChild(createStadiumRow(stadium)));
-
-    button.addEventListener("click", () => {
-        wrapper.classList.toggle("open");
-    });
-
-    wrapper.append(button, list);
-    return wrapper;
-}
-
-function fillTeamSelect(selectEl, teams, placeholderText) {
-    if (!selectEl) return;
-
-    selectEl.innerHTML = `<option value="">${placeholderText || "Takim sec"}</option>`;
-    (teams || []).forEach((team) => {
-        const option = document.createElement("option");
-        option.value = String(team.id);
-        option.textContent = team.name || `Team #${team.id}`;
-        selectEl.appendChild(option);
-    });
-}
-
-function updateAwayTeams() {
-    const homeTeamId = Number(matchHomeTeamId?.value || 0);
-    const awayCandidates = allTeams.filter((team) => team.id !== homeTeamId);
-    fillTeamSelect(matchAwayTeamId, awayCandidates, "Deplasman takim sec");
-}
-
-function onStadiumChanged() {
-    const stadiumId = Number(matchStadiumId?.value || 0);
-    const selectedStadium = stadiumIndex.get(stadiumId);
-    const teams = selectedStadium?.teams || [];
-
-    fillTeamSelect(matchHomeTeamId, teams, "Ev sahibi takim sec");
-    updateAwayTeams();
-}
-
-async function loadAllTeams() {
-    try {
-        const response = await fetch("/api/teams");
-        const data = await response.json();
-        if (response.ok && Array.isArray(data)) {
-            allTeams = data.toSorted((a, b) => (a.name || "").localeCompare(b.name || ""));
-        }
-    } catch {
-        allTeams = [];
-    }
-}
-
 function toSlug(value) {
     return String(value || "")
         .toLocaleLowerCase("tr-TR")
@@ -388,141 +216,518 @@ async function loadDashboardHighlights() {
     }
 }
 
-async function initMatchForm(stadiums) {
-    if (!matchForm || !matchStadiumId) return;
+function formatPostDate(value) {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return value;
+    return dt.toLocaleString("tr-TR", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+}
 
-    stadiumIndex = new Map((stadiums || []).map((s) => [s.id, s]));
-    matchStadiumId.innerHTML = '<option value="">Stadyum sec</option>';
+function buildPostCard(post) {
+    const userId = window.HoopAroundLayout?.user?.id;
 
-    stadiums
-        .toSorted((a, b) => (a.name || "").localeCompare(b.name || ""))
-        .forEach((stadium) => {
-            const option = document.createElement("option");
-            option.value = String(stadium.id);
-            option.textContent = `${stadium.name} (${stadium.city || "Unknown city"})`;
-            matchStadiumId.appendChild(option);
+    const article = document.createElement("article");
+    article.className = "timeline-post";
+    article.dataset.postId = String(post.id);
+
+    // Clickable body → opens post detail
+    const cardBody = document.createElement("div");
+    cardBody.className = "timeline-post-body";
+    cardBody.addEventListener("click", () => openPostDetail(post));
+
+    const meta = document.createElement("div");
+    meta.className = "timeline-post-meta";
+    meta.innerHTML = `<strong>@${post.authorUsername}</strong><span class="stadium-card-meta">${formatPostDate(post.createdAt)}</span>`;
+
+    const content = document.createElement("p");
+    content.className = "timeline-post-content";
+    content.textContent = post.content;
+
+    cardBody.append(meta, content);
+    article.appendChild(cardBody);
+
+    if (post.imageUrl) {
+        const img = document.createElement("img");
+        img.src = post.imageUrl;
+        img.className = "timeline-post-img clickable-img";
+        img.alt = "Gonderi gorseli";
+        img.addEventListener("click", () => openLightbox(post.imageUrl));
+        article.appendChild(img);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "timeline-post-actions";
+
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className = `timeline-action-btn like-btn${post.likedByCurrentUser ? " liked" : ""}`;
+    likeBtn.dataset.postId = String(post.id);
+    likeBtn.innerHTML = `<span class="like-icon">${post.likedByCurrentUser ? "❤️" : "🤍"}</span> <span class="like-count">${post.likeCount}</span>`;
+    likeBtn.addEventListener("click", () => handleToggleLike(post.id, likeBtn));
+
+    const commentBtn = document.createElement("button");
+    commentBtn.type = "button";
+    commentBtn.className = "timeline-action-btn comment-btn";
+    commentBtn.innerHTML = `💬 <span class="comment-count">${post.commentCount}</span>`;
+    commentBtn.addEventListener("click", () => toggleCommentSection(post.id, article));
+
+    actions.append(likeBtn, commentBtn);
+    article.appendChild(actions);
+
+    const commentSection = document.createElement("div");
+    commentSection.className = "comment-section hidden";
+    commentSection.dataset.postId = String(post.id);
+
+    const commentList = document.createElement("div");
+    commentList.className = "comment-list";
+    commentList.innerHTML = '<p class="stadium-card-meta">Yukleniyor...</p>';
+
+    const commentForm = document.createElement("form");
+    commentForm.className = "comment-form";
+    commentForm.innerHTML = `
+        <input type="text" class="comment-input" placeholder="Yorum yaz..." maxlength="1000" />
+        <button type="submit" class="ghost comment-submit">Gonder</button>
+    `;
+    commentForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const input = commentForm.querySelector(".comment-input");
+        const text = input?.value?.trim();
+        if (!text) return;
+        const submitBtn = commentForm.querySelector(".comment-submit");
+        submitBtn.disabled = true;
+        try {
+            const resp = await fetch(`/api/posts/${post.id}/comments/${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: text })
+            });
+            if (resp.ok) {
+                input.value = "";
+                await loadComments(post.id, commentList);
+                const countEl = article.querySelector(".comment-count");
+                if (countEl) countEl.textContent = String(Number(countEl.textContent || 0) + 1);
+            }
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    commentSection.append(commentList, commentForm);
+    article.appendChild(commentSection);
+
+    return article;
+}
+
+async function loadComments(postId, listEl) {
+    listEl.innerHTML = '<p class="stadium-card-meta">Yukleniyor...</p>';
+    try {
+        const resp = await fetch(`/api/posts/${postId}/comments`);
+        if (!resp.ok) {
+            listEl.innerHTML = '<p class="stadium-card-meta">Yorumlar yuklenemedi.</p>';
+            return;
+        }
+        const comments = await resp.json();
+        if (!Array.isArray(comments) || comments.length === 0) {
+            listEl.innerHTML = '<p class="stadium-card-meta">Henuz yorum yok.</p>';
+            return;
+        }
+        listEl.innerHTML = "";
+        comments.forEach((c) => {
+            const div = document.createElement("div");
+            div.className = "comment-item";
+            div.innerHTML = `<strong>@${c.authorUsername}</strong> <span class="stadium-card-meta">${formatPostDate(c.createdAt)}</span><p>${c.content}</p>`;
+            listEl.appendChild(div);
         });
+    } catch {
+        listEl.innerHTML = '<p class="stadium-card-meta">Yorumlar yuklenemedi.</p>';
+    }
+}
 
-    await loadAllTeams();
+async function toggleCommentSection(postId, articleEl) {
+    const section = articleEl.querySelector(`.comment-section[data-post-id="${postId}"]`);
+    if (!section) return;
+    const isHidden = section.classList.contains("hidden");
+    section.classList.toggle("hidden");
+    if (isHidden) {
+        const listEl = section.querySelector(".comment-list");
+        await loadComments(postId, listEl);
+    }
+}
 
-    fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
-    fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
+async function handleToggleLike(postId, btnEl) {
+    const userId = window.HoopAroundLayout?.user?.id;
+    if (!userId) return;
+    btnEl.disabled = true;
+    try {
+        const resp = await fetch(`/api/posts/${postId}/likes/${userId}`, { method: "POST" });
+        if (resp.ok) {
+            const data = await resp.json();
+            const iconEl = btnEl.querySelector(".like-icon");
+            const countEl = btnEl.querySelector(".like-count");
+            if (data.liked) {
+                btnEl.classList.add("liked");
+                if (iconEl) iconEl.textContent = "❤️";
+            } else {
+                btnEl.classList.remove("liked");
+                if (iconEl) iconEl.textContent = "🤍";
+            }
+            if (countEl) countEl.textContent = String(data.likeCount);
+        }
+    } finally {
+        btnEl.disabled = false;
+    }
+}
 
-    matchStadiumId.addEventListener("change", onStadiumChanged);
-    matchHomeTeamId?.addEventListener("change", updateAwayTeams);
+async function loadTimeline() {
+    const listEl = document.getElementById("timelineList");
+    if (!listEl) return;
+    const userId = window.HoopAroundLayout?.user?.id;
 
-    matchForm.addEventListener("submit", async (event) => {
+    try {
+        const url = userId ? `/api/posts?userId=${userId}` : "/api/posts";
+        const response = await fetch(url);
+        if (!response.ok) {
+            listEl.innerHTML = '<p class="stadium-card-meta">Timeline yuklenemedi.</p>';
+            return;
+        }
+
+        const posts = await response.json();
+        if (!Array.isArray(posts) || posts.length === 0) {
+            listEl.innerHTML = '<p class="stadium-card-meta">Henuz gonderi yok. Ilk gonderiyi sen yayinla!</p>';
+            return;
+        }
+
+        listEl.innerHTML = "";
+        posts.forEach((post) => listEl.appendChild(buildPostCard(post)));
+    } catch {
+        listEl.innerHTML = '<p class="stadium-card-meta">Timeline yuklenemedi.</p>';
+    }
+}
+
+function closePostModal() {
+    const postModalOverlay = document.getElementById("postModalOverlay");
+    const postForm = document.getElementById("postForm");
+    const postImagePreview = document.getElementById("postImagePreview");
+    const postCharCount = document.getElementById("postCharCount");
+    const postFormInfo = document.getElementById("postFormInfo");
+
+    postModalOverlay?.classList.add("hidden");
+    postForm?.reset();
+    if (postPreviewUrl) {
+        URL.revokeObjectURL(postPreviewUrl);
+        postPreviewUrl = null;
+    }
+    if (postImagePreview) {
+        postImagePreview.innerHTML = "";
+        postImagePreview.classList.add("hidden");
+    }
+    if (postCharCount) {
+        postCharCount.textContent = "0 / 2000";
+    }
+    if (postFormInfo) {
+        postFormInfo.textContent = "";
+    }
+}
+
+function initFab() {
+    const fabBtn = document.getElementById("fabBtn");
+    const fabMenu = document.getElementById("fabMenu");
+    const fabPostBtn = document.getElementById("fabPostBtn");
+    const fabMatchBtn = document.getElementById("fabMatchBtn");
+    const postModalOverlay = document.getElementById("postModalOverlay");
+    const postModalClose = document.getElementById("postModalClose");
+    const postForm = document.getElementById("postForm");
+    const postContent = document.getElementById("postContent");
+    const postImage = document.getElementById("postImage");
+    const postImagePreview = document.getElementById("postImagePreview");
+    const postCharCount = document.getElementById("postCharCount");
+    const postSubmitBtn = document.getElementById("postSubmitBtn");
+    const postFormInfo = document.getElementById("postFormInfo");
+
+    if (!fabBtn || !fabMenu) return;
+
+    fabBtn.addEventListener("click", () => {
+        fabMenu.classList.toggle("hidden");
+        fabBtn.classList.toggle("open");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!fabBtn.contains(event.target) && !fabMenu.contains(event.target)) {
+            fabMenu.classList.add("hidden");
+            fabBtn.classList.remove("open");
+        }
+    });
+
+    fabPostBtn?.addEventListener("click", () => {
+        fabMenu.classList.add("hidden");
+        fabBtn.classList.remove("open");
+        postModalOverlay?.classList.remove("hidden");
+        postContent?.focus();
+    });
+
+    fabMatchBtn?.addEventListener("click", () => {
+        window.location.href = "/collection-add.html";
+    });
+
+    postModalClose?.addEventListener("click", closePostModal);
+    postModalOverlay?.addEventListener("click", (event) => {
+        if (event.target === postModalOverlay) {
+            closePostModal();
+        }
+    });
+
+    postContent?.addEventListener("input", () => {
+        if (postCharCount) {
+            postCharCount.textContent = `${postContent.value.length} / 2000`;
+        }
+    });
+
+    postImage?.addEventListener("change", () => {
+        if (postPreviewUrl) {
+            URL.revokeObjectURL(postPreviewUrl);
+            postPreviewUrl = null;
+        }
+
+        if (!postImage.files || postImage.files.length === 0) {
+            postImagePreview?.classList.add("hidden");
+            if (postImagePreview) {
+                postImagePreview.innerHTML = "";
+            }
+            return;
+        }
+
+        postPreviewUrl = URL.createObjectURL(postImage.files[0]);
+        if (postImagePreview) {
+            postImagePreview.innerHTML = `<img src="${postPreviewUrl}" alt="Onizleme" class="timeline-post-img" />`;
+            postImagePreview.classList.remove("hidden");
+        }
+    });
+
+    postForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const userId = window.HoopAroundLayout?.user?.id;
+        const content = postContent?.value?.trim();
         if (!userId) {
-            if (matchFormInfo) matchFormInfo.textContent = "Kullanici bilgisi bulunamadi.";
+            if (postFormInfo) {
+                postFormInfo.textContent = "Kullanici bilgisi bulunamadi.";
+            }
+            return;
+        }
+        if (!content) {
+            if (postFormInfo) {
+                postFormInfo.textContent = "Icerik bos olamaz.";
+            }
             return;
         }
 
-        const payload = {
-            stadiumId: Number(matchStadiumId.value),
-            homeTeamId: Number(matchHomeTeamId.value),
-            awayTeamId: Number(matchAwayTeamId.value),
-            matchAt: matchAt.value,
-            stadiumRating: matchRating.value ? Number(matchRating.value) : null,
-            comment: matchComment.value || null
-        };
-
-        if (!payload.stadiumId || !payload.homeTeamId || !payload.awayTeamId || !payload.matchAt) {
-            if (matchFormInfo) matchFormInfo.textContent = "Lutfen gerekli alanlari doldur.";
-            return;
+        if (postSubmitBtn) {
+            postSubmitBtn.disabled = true;
         }
-
-        if (payload.homeTeamId === payload.awayTeamId) {
-            if (matchFormInfo) matchFormInfo.textContent = "Ev sahibi ve deplasman takimlari farkli olmali.";
-            return;
+        if (postFormInfo) {
+            postFormInfo.textContent = "";
         }
 
         try {
-            if (matchSubmitBtn) matchSubmitBtn.disabled = true;
+            const formData = new FormData();
+            formData.append("content", content);
+            if (postImage?.files?.length > 0) {
+                formData.append("image", postImage.files[0]);
+            }
 
-            const response = await fetch(`/api/users/${userId}/matches`, {
+            const response = await fetch(`/api/posts/${userId}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: formData
             });
-
-            const body = await response.json().catch(() => null);
-
+            const data = await response.json().catch(() => null);
             if (!response.ok) {
-                if (matchFormInfo) {
-                    matchFormInfo.textContent = body?.message || body?.error || "Mac koleksiyona eklenemedi.";
+                if (postFormInfo) {
+                    postFormInfo.textContent = data?.message || data?.error || "Gonderi yayinlanamadi.";
                 }
                 return;
             }
 
-            if (matchFormInfo) matchFormInfo.textContent = "Mac koleksiyona eklendi.";
-            matchForm.reset();
-            fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
-            fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
-            await loadDashboardHighlights();
-        } catch (error) {
-            if (matchFormInfo) matchFormInfo.textContent = error.message || "Mac koleksiyona eklenemedi.";
+            closePostModal();
+            await loadTimeline();
+        } catch {
+            if (postFormInfo) {
+                postFormInfo.textContent = "Gonderi yayinlanamadi.";
+            }
         } finally {
-            if (matchSubmitBtn) matchSubmitBtn.disabled = false;
+            if (postSubmitBtn) {
+                postSubmitBtn.disabled = false;
+            }
         }
     });
 }
 
-async function loadCountriesAndStadiums() {
-    const hasCountryList = !!countryList;
-
-    if (hasCountryList) {
-        countryList.innerHTML = '<div class="empty">Loading countries...</div>';
-    }
+async function loadNotifications() {
+    const userId = window.HoopAroundLayout?.user?.id;
+    const listEl = document.getElementById("notificationsList");
+    if (!userId || !listEl) return;
 
     try {
-        const response = await fetch("/api/stadiums");
-        const data = await response.json();
-
+        const response = await fetch(`/api/chats/${userId}`);
         if (!response.ok) {
-            const message = data?.message || data?.error || "Could not load stadiums.";
-            if (hasCountryList) {
-                countryList.innerHTML = `<div class="error">${message}</div>`;
-            }
-            if (matchFormInfo) {
-                matchFormInfo.textContent = message;
-            }
+            listEl.innerHTML = '<p class="stadium-card-meta">Bildirimler yuklenemedi.</p>';
             return;
         }
 
-        if (!Array.isArray(data) || data.length === 0) {
-            if (hasCountryList) {
-                countryList.innerHTML = '<div class="empty">No stadium data found.</div>';
-            }
-            if (matchFormInfo) {
-                matchFormInfo.textContent = "Stadyum verisi bulunamadi.";
-            }
+        const summaries = await response.json();
+        const unread = (Array.isArray(summaries) ? summaries : []).filter((s) => s.unreadCount > 0);
+
+        if (unread.length === 0) {
+            listEl.innerHTML = '<p class="stadium-card-meta">Okunmamis mesaj yok.</p>';
             return;
         }
 
-        if (hasCountryList) {
-            const countries = groupByCountry(data);
-            countryList.innerHTML = "";
-            countries.forEach((country, index) => {
-                countryList.appendChild(createCountryItem(country, index === 0));
-            });
-        }
+        listEl.innerHTML = "";
+        unread.forEach((s) => {
+            const item = document.createElement("a");
+            item.href = `/chat.html?username=${encodeURIComponent(s.otherUsername)}`;
+            item.className = "notification-item";
 
-        initMatchForm(data);
-    } catch (error) {
-        if (hasCountryList) {
-            countryList.innerHTML = `<div class="error">${error.message || "Unexpected error"}</div>`;
-        }
-        if (matchFormInfo) {
-            matchFormInfo.textContent = error.message || "Stadyum verisi yuklenemedi.";
-        }
+            const name = document.createElement("strong");
+            name.textContent = `@${s.otherUsername}`;
+
+            const badge = document.createElement("span");
+            badge.className = "notification-badge";
+            badge.textContent = String(s.unreadCount);
+
+            const preview = document.createElement("p");
+            preview.className = "stadium-card-meta";
+            preview.textContent = s.lastMessage || "";
+
+            item.append(name, badge, preview);
+            listEl.appendChild(item);
+        });
+    } catch {
+        listEl.innerHTML = '<p class="stadium-card-meta">Bildirimler yuklenemedi.</p>';
     }
+}
+
+function openPostDetail(post) {
+    const userId = window.HoopAroundLayout?.user?.id;
+    const overlay = document.getElementById("postDetailOverlay");
+    if (!overlay) return;
+
+    document.getElementById("postDetailAuthor").textContent = `@${post.authorUsername}`;
+    document.getElementById("postDetailDate").textContent = formatPostDate(post.createdAt);
+    document.getElementById("postDetailContent").textContent = post.content;
+
+    const imgWrap = document.getElementById("postDetailImage");
+    if (post.imageUrl) {
+        imgWrap.innerHTML = `<img src="${post.imageUrl}" class="timeline-post-img clickable-img" alt="Gonderi gorseli" style="margin-bottom:4px;" />`;
+        imgWrap.querySelector("img").addEventListener("click", () => openLightbox(post.imageUrl));
+        imgWrap.classList.remove("hidden");
+    } else {
+        imgWrap.innerHTML = "";
+        imgWrap.classList.add("hidden");
+    }
+
+    const likeBtn = document.getElementById("postDetailLikeBtn");
+    if (likeBtn) {
+        likeBtn.className = `timeline-action-btn like-btn${post.likedByCurrentUser ? " liked" : ""}`;
+        likeBtn.innerHTML = `<span class="like-icon">${post.likedByCurrentUser ? "❤️" : "🤍"}</span> <span class="like-count">${post.likeCount}</span>`;
+        likeBtn.onclick = () => {
+            handleToggleLike(post.id, likeBtn);
+            // Sync count back to timeline card
+            const card = document.querySelector(`.timeline-post[data-post-id="${post.id}"]`);
+            const cardLikeBtn = card?.querySelector(".like-btn");
+            if (cardLikeBtn) {
+                setTimeout(() => {
+                    const likeIcon = likeBtn.querySelector(".like-icon");
+                    const likeCount = likeBtn.querySelector(".like-count");
+                    const cardIcon = cardLikeBtn.querySelector(".like-icon");
+                    const cardCount = cardLikeBtn.querySelector(".like-count");
+                    if (cardIcon) cardIcon.textContent = likeIcon?.textContent || "";
+                    if (cardCount) cardCount.textContent = likeCount?.textContent || "";
+                    if (likeBtn.classList.contains("liked")) cardLikeBtn.classList.add("liked");
+                    else cardLikeBtn.classList.remove("liked");
+                }, 200);
+            }
+        };
+    }
+
+    const commentList = document.getElementById("postDetailCommentList");
+    if (commentList) loadComments(post.id, commentList);
+
+    const commentForm = document.getElementById("postDetailCommentForm");
+    commentForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const input = document.getElementById("postDetailCommentInput");
+        const text = input?.value?.trim();
+        if (!text || !userId) return;
+        const submitBtn = commentForm.querySelector(".comment-submit");
+        submitBtn.disabled = true;
+        try {
+            const resp = await fetch(`/api/posts/${post.id}/comments/${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: text })
+            });
+            if (resp.ok) {
+                input.value = "";
+                await loadComments(post.id, commentList);
+                const card = document.querySelector(`.timeline-post[data-post-id="${post.id}"]`);
+                const countEl = card?.querySelector(".comment-count");
+                if (countEl) countEl.textContent = String(Number(countEl.textContent || 0) + 1);
+            }
+        } finally {
+            submitBtn.disabled = false;
+        }
+    };
+
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+}
+
+function closePostDetail() {
+    document.getElementById("postDetailOverlay")?.classList.add("hidden");
+    document.body.style.overflow = "";
+}
+
+function openLightbox(imageUrl) {
+    const overlay = document.getElementById("lightboxOverlay");
+    const img = document.getElementById("lightboxImg");
+    if (!overlay || !img) return;
+    img.src = imageUrl;
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+}
+
+function closeLightbox() {
+    document.getElementById("lightboxOverlay")?.classList.add("hidden");
+    if (!document.getElementById("postDetailOverlay")?.classList.contains("hidden")) return;
+    document.body.style.overflow = "";
+}
+
+function initPostDetailModal() {
+    const overlay = document.getElementById("postDetailOverlay");
+    if (!overlay) return;
+    document.getElementById("postDetailClose")?.addEventListener("click", closePostDetail);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closePostDetail(); });
+}
+
+function initLightbox() {
+    const overlay = document.getElementById("lightboxOverlay");
+    if (!overlay) return;
+    document.getElementById("lightboxClose")?.addEventListener("click", closeLightbox);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeLightbox(); });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { closeLightbox(); closePostDetail(); }
+    });
 }
 
 if (window.HoopAroundLayout?.user) {
     initGlobalSearch();
-    loadCountriesAndStadiums();
     loadDashboardHighlights();
+    loadNotifications();
+    loadTimeline();
+    initFab();
+    initPostDetailModal();
+    initLightbox();
 }

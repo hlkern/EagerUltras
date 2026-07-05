@@ -31,6 +31,7 @@
         <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
         <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
+        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Mac Ekle</a>
         <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
     </nav>
 </aside>
@@ -76,58 +77,82 @@
             <h3>Next Goals</h3>
             <p id="latestWishlistText">Wishlist'e henuz stad eklenmedi.</p>
         </article>
-        <article class="card">
-            <h3>Arkadaslar</h3>
-            <p>Yakinda...</p>
+        <article class="card" id="notificationsCard">
+            <h3>Bildirimler</h3>
+            <div id="notificationsList"><p class="stadium-card-meta">Yukleniyor...</p></div>
         </article>
     </section>
 
-    <section class="match-form-card">
-        <div class="section-head">
-            <h3>Koleksiyona mac ekle</h3>
-            <p>Stadyum, takimlar, tarih-saat, puan ve yorum gir.</p>
-        </div>
-        <form id="matchForm" class="match-form">
-            <label>
-                Stadyum
-                <select id="matchStadiumId" required>
-                    <option value="">Stadyum sec</option>
-                </select>
-            </label>
+    <section class="card timeline-card">
 
-            <label>
-                Ev sahibi takim
-                <select id="matchHomeTeamId" required>
-                    <option value="">Takim sec</option>
-                </select>
-            </label>
-
-            <label>
-                Deplasman takim
-                <select id="matchAwayTeamId" required>
-                    <option value="">Takim sec</option>
-                </select>
-            </label>
-
-            <label>
-                Mac tarihi ve saati
-                <input id="matchAt" type="datetime-local" required />
-            </label>
-
-            <label>
-                Stadyum puani (1-10)
-                <input id="matchRating" type="number" min="1" max="10" />
-            </label>
-
-            <label class="full-width">
-                Yorum
-                <textarea id="matchComment" rows="3" placeholder="Mac deneyimini yaz..."></textarea>
-            </label>
-
-            <button id="matchSubmitBtn" class="ghost" type="submit">Maci koleksiyona ekle</button>
-        </form>
-        <p id="matchFormInfo" class="stadium-card-meta"></p>
+        <div id="timelineList"><p class="stadium-card-meta">Yukleniyor...</p></div>
     </section>
+
+    <div id="fabMenu" class="fab-menu hidden">
+        <button type="button" class="fab-action-btn" id="fabPostBtn">
+            <span class="fab-action-icon">✏️</span>
+            <span>Gonderi yayinla</span>
+        </button>
+        <button type="button" class="fab-action-btn" id="fabMatchBtn">
+            <span class="fab-action-icon">⚽</span>
+            <span>Koleksiyona mac ekle</span>
+        </button>
+    </div>
+    <button type="button" id="fabBtn" class="fab" aria-label="Yeni icerik">+</button>
+
+    <!-- Post Detail Modal -->
+    <div id="postDetailOverlay" class="post-modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="post-modal post-detail-modal">
+            <div class="post-modal-head">
+                <div>
+                    <strong id="postDetailAuthor"></strong>
+                    <p id="postDetailDate" class="stadium-card-meta" style="margin:2px 0 0;"></p>
+                </div>
+                <button type="button" id="postDetailClose" class="ghost">✕</button>
+            </div>
+            <p id="postDetailContent" class="timeline-post-content"></p>
+            <div id="postDetailImage" class="hidden"></div>
+            <div class="post-detail-actions">
+                <button type="button" id="postDetailLikeBtn" class="timeline-action-btn like-btn">🤍 <span id="postDetailLikeCount">0</span></button>
+            </div>
+            <div class="post-detail-comments">
+                <h4>Yorumlar</h4>
+                <div id="postDetailCommentList" class="comment-list"></div>
+                <form id="postDetailCommentForm" class="comment-form" style="margin-top:10px;">
+                    <input type="text" id="postDetailCommentInput" class="comment-input" placeholder="Yorum yaz..." maxlength="1000" />
+                    <button type="submit" class="ghost comment-submit">Gonder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightboxOverlay" class="lightbox-overlay hidden">
+        <button type="button" id="lightboxClose" class="lightbox-close">✕</button>
+        <img id="lightboxImg" src="" alt="Tam boyut gorsel" class="lightbox-img" />
+    </div>
+
+    <div id="postModalOverlay" class="post-modal-overlay hidden" role="dialog" aria-modal="true">
+        <div class="post-modal">
+            <div class="post-modal-head">
+                <h3>Gonderi yayinla</h3>
+                <button type="button" id="postModalClose" class="ghost">✕</button>
+            </div>
+            <form id="postForm">
+                <textarea id="postContent" rows="4" placeholder="Ne dusunuyorsun?" maxlength="2000"></textarea>
+                <label class="post-image-label">
+                    <span>Fotograf ekle (opsiyonel)</span>
+                    <input type="file" id="postImage" accept="image/*" />
+                </label>
+                <div id="postImagePreview" class="post-image-preview hidden"></div>
+                <div class="post-modal-actions">
+                    <span id="postCharCount" class="stadium-card-meta">0 / 2000</span>
+                    <button type="submit" id="postSubmitBtn" class="ghost">Paylas</button>
+                </div>
+            </form>
+            <p id="postFormInfo" class="stadium-card-meta"></p>
+        </div>
+    </div>
 </main>
 
 <script src="/js/layout.js"></script>

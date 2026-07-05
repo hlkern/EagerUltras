@@ -4,6 +4,11 @@ spring:
     username: postgres
     password: 123
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -20,3 +25,6 @@ spring:
 server:
   error:
     include-message: always
+
+app:
+  upload-dir: ${user.home}/eagerultras-uploads

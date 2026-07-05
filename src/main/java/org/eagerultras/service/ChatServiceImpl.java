@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ChatMessageResponse> getMessages(Long userId, String otherUsername) {
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
@@ -56,6 +57,8 @@ public class ChatServiceImpl implements ChatService {
         if (conversation == null) {
             return List.of();
         }
+
+        userMessageRepository.markConversationAsRead(conversation.getId(), currentUser.getId(), LocalDateTime.now());
 
         return userMessageRepository.findAllByConversationIdOrderByCreatedAtAsc(conversation.getId())
                 .stream()
@@ -115,11 +118,15 @@ public class ChatServiceImpl implements ChatService {
         UserMessage lastMessage = userMessageRepository.findTopByConversationIdOrderByCreatedAtDesc(conversation.getId())
                 .orElse(null);
 
+        long unreadCount = userMessageRepository.countByConversationIdAndSenderIdNotAndReadAtIsNull(
+                conversation.getId(), currentUser.getId());
+
         ChatSummaryResponse response = new ChatSummaryResponse();
         response.setOtherUserId(otherUser.getId());
         response.setOtherUsername(otherUser.getUsername());
         response.setLastMessage(lastMessage != null ? lastMessage.getContent() : "Mesaj yok");
         response.setLastMessageAt(lastMessage != null ? lastMessage.getCreatedAt() : conversation.getCreatedAt());
+        response.setUnreadCount((int) Math.min(unreadCount, Integer.MAX_VALUE));
         return response;
     }
 
