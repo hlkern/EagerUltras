@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/eager_ultras}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
   servlet:
     multipart:
@@ -12,10 +12,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   sql:
@@ -23,9 +22,9 @@ spring:
       mode: never
 
 server:
+  port: ${PORT:8080}
   error:
     include-message: always
 
 app:
-  upload-dir: ${UPLOAD_DIR:${user.home}/eagerultras-uploads}
-
+  upload-dir: ${UPLOAD_DIR:/tmp/eagerultras-uploads}

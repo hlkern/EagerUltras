@@ -53,8 +53,15 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompileOnly 'org.projectlombok:lombok:1.18.32'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+    // .env file support for local development
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+bootJar {
+    archiveFileName = 'app.jar'
 }
