@@ -339,7 +339,7 @@ function createInsightsSection(stadiumId) {
         const list = Array.isArray(insights.comments) ? insights.comments : [];
         comments.innerHTML = "";
         if (list.length === 0) {
-            comments.innerHTML = '<div class="empty">Henuz yorum yok.</div>';
+            comments.innerHTML = '<div class="empty">No comments yet.</div>';
         } else {
             list.forEach((comment) => comments.appendChild(createCommentItem(comment)));
         }

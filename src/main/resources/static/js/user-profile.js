@@ -49,7 +49,7 @@ function createMatchCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Bilinmeyen stad";
+    title.textContent = match.stadium?.name || "Unknown stadium";
 
     const teams = document.createElement("p");
     teams.className = "stadium-card-meta";
@@ -69,7 +69,7 @@ function createRatingCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Bilinmeyen stad";
+    title.textContent = match.stadium?.name || "Unknown stadium";
 
     const rating = document.createElement("p");
     rating.className = "stadium-card-meta";
@@ -89,7 +89,7 @@ function createCommentCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Bilinmeyen stad";
+    title.textContent = match.stadium?.name || "Unknown stadium";
 
     const comment = document.createElement("p");
     comment.className = "stadium-card-meta";
@@ -109,7 +109,7 @@ function createWishlistCard(stadium) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = stadium.name || "Bilinmeyen stad";
+    title.textContent = stadium.name || "Unknown stadium";
 
     const meta = document.createElement("p");
     meta.className = "stadium-card-meta";

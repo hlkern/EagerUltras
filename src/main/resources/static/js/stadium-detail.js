@@ -140,7 +140,7 @@ function renderStadium(stadium, insights) {
     stadiumComments.innerHTML = "";
     const comments = Array.isArray(insights?.comments) ? insights.comments : [];
     if (comments.length === 0) {
-        stadiumComments.innerHTML = '<div class="empty">Henuz yorum yok.</div>';
+        stadiumComments.innerHTML = '<div class="empty">No comments yet.</div>';
     } else {
         comments.forEach((comment) => stadiumComments.appendChild(renderCommentItem(comment)));
     }

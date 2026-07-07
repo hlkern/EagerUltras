@@ -51,7 +51,7 @@ function renderSearchResults(items) {
         button.dataset.index = String(index);
 
         const title = document.createElement("strong");
-        title.textContent = item.label || "Sonuc";
+        title.textContent = item.label || "Result";
 
         const meta = document.createElement("span");
         meta.className = "search-result-meta";
@@ -189,18 +189,18 @@ async function loadDashboardHighlights() {
         if (data?.latestVisitedStadium) {
             const matchAtText = formatMatchDate(data.latestVisitedMatchAt);
             if (latestVisitedText) {
-                latestVisitedText.textContent = `${data.latestVisitedStadium.name || "Bilinmeyen stad"} | ${matchAtText}`;
+                latestVisitedText.textContent = `${data.latestVisitedStadium.name || "Unknown stadium"} | ${matchAtText}`;
             }
             bindCardToStadium(latestVisitedCard, data.latestVisitedStadium);
         } else if (latestVisitedText) {
-            latestVisitedText.textContent = "Henuz mac eklenmedi.";
+            latestVisitedText.textContent = "No matches added yet.";
         }
 
         if (data?.latestWishlistStadium) {
             const city = data.latestWishlistStadium.city || "";
             const cityPart = city ? ` | ${city}` : "";
             if (latestWishlistText) {
-                latestWishlistText.textContent = `${data.latestWishlistStadium.name || "Bilinmeyen stad"}${cityPart}`;
+                latestWishlistText.textContent = `${data.latestWishlistStadium.name || "Unknown stadium"}${cityPart}`;
             }
             bindCardToStadium(latestWishlistCard, data.latestWishlistStadium);
         } else if (latestWishlistText) {
@@ -331,7 +331,7 @@ async function loadComments(postId, listEl) {
         }
         const comments = await resp.json();
         if (!Array.isArray(comments) || comments.length === 0) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Henuz yorum yok.</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">No comments yet.</p>';
             return;
         }
         listEl.innerHTML = "";
@@ -396,7 +396,7 @@ async function loadTimeline() {
 
         const posts = await response.json();
         if (!Array.isArray(posts) || posts.length === 0) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Henuz gonderi yok. Ilk gonderiyi sen yayinla!</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">No posts yet. Be the first to share one.</p>';
             return;
         }
 
@@ -501,7 +501,7 @@ function initFab() {
 
         postPreviewUrl = URL.createObjectURL(postImage.files[0]);
         if (postImagePreview) {
-            postImagePreview.innerHTML = `<img src="${postPreviewUrl}" alt="Onizleme" class="timeline-post-img" />`;
+            postImagePreview.innerHTML = `<img src="${postPreviewUrl}" alt="Preview" class="timeline-post-img" />`;
             postImagePreview.classList.remove("hidden");
         }
     });
@@ -580,7 +580,7 @@ async function loadNotifications() {
         const unread = (Array.isArray(summaries) ? summaries : []).filter((s) => s.unreadCount > 0);
 
         if (unread.length === 0) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Okunmamis mesaj yok.</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">No unread messages.</p>';
             return;
         }
 
