@@ -27,6 +27,7 @@ dependencies {
 
     // Spring Core & Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Request validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
