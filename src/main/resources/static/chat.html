@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HoopAround | Sohbet</title>
+    <title>HoopAround | Chat</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -15,14 +15,14 @@
 <aside id="sidebar" class="sidebar" aria-hidden="true">
     <div class="sidebar-head"><h3>HoopAround</h3><p>Groundhoopers app</p></div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
-        <a href="/map.html" class="sidebar-link" data-nav="map">Harita</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
+        <a href="/map.html" class="sidebar-link" data-nav="map">Map</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
     </nav>
 </aside>
 
@@ -30,37 +30,37 @@
     <header class="topbar">
         <div class="topbar-left">
             <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-            <div><p class="tiny">GROUNDHOOPERS APP</p><h1>Sohbet</h1></div>
+            <div><p class="tiny">GROUNDHOOPERS APP</p><h1>Chat</h1></div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
     </header>
 
     <section class="card">
-        <h3>Yeni sohbet baslat</h3>
+        <h3>Start a new chat</h3>
         <div class="chat-new-row">
             <div class="search-wrap">
-                <input id="chatUserSearchInput" class="search-input" type="text" placeholder="Kullanici adi ara" autocomplete="off" />
+                <input id="chatUserSearchInput" class="search-input" type="text" placeholder="Search username" autocomplete="off" />
                 <div id="chatUserSearchResults" class="search-results hidden"></div>
             </div>
-            <button id="chatStartBtn" class="ghost" type="button">Sohbet ac</button>
+            <button id="chatStartBtn" class="ghost" type="button">Open chat</button>
         </div>
         <p id="chatInfo" class="stadium-card-meta"></p>
     </section>
 
     <section class="chat-layout">
         <article class="card">
-            <h3>Gecmis sohbetler</h3>
+            <h3>Previous chats</h3>
             <div id="chatSummaryList" class="chat-summary-list"></div>
         </article>
 
         <article class="card">
             <div class="chat-thread-head">
-                <h3 id="chatThreadTitle">Sohbet sec</h3>
+                <h3 id="chatThreadTitle">Select a chat</h3>
             </div>
             <div id="chatMessages" class="chat-messages"></div>
             <form id="chatSendForm" class="chat-send-form">
-                <textarea id="chatMessageInput" rows="3" placeholder="Mesaj yaz..." required></textarea>
-                <button id="chatSendBtn" class="ghost" type="submit">Gonder</button>
+                <textarea id="chatMessageInput" rows="3" placeholder="Write a message..." required></textarea>
+                <button id="chatSendBtn" class="ghost" type="submit">Send</button>
             </form>
         </article>
     </section>

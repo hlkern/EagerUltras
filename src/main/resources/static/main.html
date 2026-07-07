@@ -25,15 +25,15 @@
         <p>Groundhoopers app</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
-        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Mac Ekle</a>
-        <a href="/map.html" class="sidebar-link" data-nav="map">Harita</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
+        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Add Match</a>
+        <a href="/map.html" class="sidebar-link" data-nav="map">Map</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
     </nav>
 </aside>
 
@@ -59,11 +59,11 @@
     </section>
 
     <section class="card search-card">
-        <h3>Hizli arama</h3>
-        <p>Takim, stadyum ve lig ara. Sonucu tiklayinca ilgili sayfaya git.</p>
+        <h3>Quick search</h3>
+        <p>Search teams, stadiums, and leagues. Click a result to open its page.</p>
         <div class="search-wrap">
-            <label for="globalSearchInput" class="tiny">Arama</label>
-            <input id="globalSearchInput" class="search-input" type="text" placeholder="Orn: Turkiye, Fenerbahce, Ulker" autocomplete="off" />
+            <label for="globalSearchInput" class="tiny">Search</label>
+            <input id="globalSearchInput" class="search-input" type="text" placeholder="Example: Turkey, Fenerbahce, Ulker" autocomplete="off" />
             <div id="globalSearchResults" class="search-results hidden" aria-live="polite"></div>
         </div>
     </section>
@@ -71,35 +71,35 @@
 
     <section class="grid-cards">
         <article id="latestVisitedCard" class="card">
-            <h3>En son ziyaret edilen stad</h3>
-            <p id="latestVisitedText">Henuz mac eklenmedi.</p>
+            <h3>Latest visited stadium</h3>
+            <p id="latestVisitedText">No matches added yet.</p>
         </article>
         <article id="latestWishlistCard" class="card">
             <h3>Next Goals</h3>
-            <p id="latestWishlistText">Wishlist'e henuz stad eklenmedi.</p>
+            <p id="latestWishlistText">No stadiums added to your wishlist yet.</p>
         </article>
         <article class="card" id="notificationsCard">
-            <h3>Bildirimler</h3>
-            <div id="notificationsList"><p class="stadium-card-meta">Yukleniyor...</p></div>
+            <h3>Notifications</h3>
+            <div id="notificationsList"><p class="stadium-card-meta">Loading...</p></div>
         </article>
     </section>
 
     <section class="card timeline-card">
 
-        <div id="timelineList"><p class="stadium-card-meta">Yukleniyor...</p></div>
+        <div id="timelineList"><p class="stadium-card-meta">Loading...</p></div>
     </section>
 
     <div id="fabMenu" class="fab-menu hidden">
         <button type="button" class="fab-action-btn" id="fabPostBtn">
             <span class="fab-action-icon">✏️</span>
-            <span>Gonderi yayinla</span>
+            <span>Create post</span>
         </button>
         <button type="button" class="fab-action-btn" id="fabMatchBtn">
             <span class="fab-action-icon">⚽</span>
-            <span>Koleksiyona mac ekle</span>
+            <span>Add match to collection</span>
         </button>
     </div>
-    <button type="button" id="fabBtn" class="fab" aria-label="Yeni icerik">+</button>
+    <button type="button" id="fabBtn" class="fab" aria-label="New content">+</button>
 
     <!-- Post Detail Modal -->
     <div id="postDetailOverlay" class="post-modal-overlay hidden" role="dialog" aria-modal="true">
@@ -117,11 +117,11 @@
                 <button type="button" id="postDetailLikeBtn" class="timeline-action-btn like-btn">🤍 <span id="postDetailLikeCount">0</span></button>
             </div>
             <div class="post-detail-comments">
-                <h4>Yorumlar</h4>
+                <h4>Comments</h4>
                 <div id="postDetailCommentList" class="comment-list"></div>
                 <form id="postDetailCommentForm" class="comment-form" style="margin-top:10px;">
-                    <input type="text" id="postDetailCommentInput" class="comment-input" placeholder="Yorum yaz..." maxlength="1000" />
-                    <button type="submit" class="ghost comment-submit">Gonder</button>
+                    <input type="text" id="postDetailCommentInput" class="comment-input" placeholder="Write a comment..." maxlength="1000" />
+                    <button type="submit" class="ghost comment-submit">Send</button>
                 </form>
             </div>
         </div>
@@ -130,25 +130,25 @@
     <!-- Lightbox -->
     <div id="lightboxOverlay" class="lightbox-overlay hidden">
         <button type="button" id="lightboxClose" class="lightbox-close">✕</button>
-        <img id="lightboxImg" src="" alt="Tam boyut gorsel" class="lightbox-img" />
+        <img id="lightboxImg" src="" alt="Full-size image" class="lightbox-img" />
     </div>
 
     <div id="postModalOverlay" class="post-modal-overlay hidden" role="dialog" aria-modal="true">
         <div class="post-modal">
             <div class="post-modal-head">
-                <h3>Gonderi yayinla</h3>
+                <h3>Create post</h3>
                 <button type="button" id="postModalClose" class="ghost">✕</button>
             </div>
             <form id="postForm">
-                <textarea id="postContent" rows="4" placeholder="Ne dusunuyorsun?" maxlength="2000"></textarea>
+                <textarea id="postContent" rows="4" placeholder="What are you thinking?" maxlength="2000"></textarea>
                 <label class="post-image-label">
-                    <span>Fotograf ekle (opsiyonel)</span>
+                    <span>Add photo (optional)</span>
                     <input type="file" id="postImage" accept="image/*" />
                 </label>
                 <div id="postImagePreview" class="post-image-preview hidden"></div>
                 <div class="post-modal-actions">
                     <span id="postCharCount" class="stadium-card-meta">0 / 2000</span>
-                    <button type="submit" id="postSubmitBtn" class="ghost">Paylas</button>
+                    <button type="submit" id="postSubmitBtn" class="ghost">Share</button>
                 </div>
             </form>
             <p id="postFormInfo" class="stadium-card-meta"></p>

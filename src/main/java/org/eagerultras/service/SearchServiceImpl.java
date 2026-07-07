@@ -49,7 +49,7 @@ public class SearchServiceImpl implements SearchService {
 
         stadiumRepository.findTop8ByNameContainingIgnoreCaseOrderByNameAsc(query)
                 .forEach(stadium -> candidates.add(new SearchCandidate(
-                        toStadiumItem(stadium.getName(), stadium.getCountry() != null ? stadium.getCountry().getName() : "Stadyum"),
+                        toStadiumItem(stadium.getName(), stadium.getCountry() != null ? stadium.getCountry().getName() : "Stadium"),
                         score(stadium.getName(), normalizedQuery),
                         stadium.getName()
                 )));
@@ -83,7 +83,7 @@ public class SearchServiceImpl implements SearchService {
         SearchItemResponse item = new SearchItemResponse();
         item.setType("TEAM");
         item.setLabel(name);
-        item.setSubtitle("Takim");
+        item.setSubtitle("Team");
         item.setSeoPath("/takim/" + SlugUtil.toSlug(name));
         return item;
     }
@@ -101,7 +101,7 @@ public class SearchServiceImpl implements SearchService {
         SearchItemResponse item = new SearchItemResponse();
         item.setType("USER");
         item.setLabel(username);
-        item.setSubtitle("Kullanici");
+        item.setSubtitle("User");
         item.setSeoPath("/kullanici/" + username);
         return item;
     }

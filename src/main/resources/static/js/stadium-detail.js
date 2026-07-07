@@ -17,7 +17,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -111,7 +111,7 @@ function renderCommentItem(comment) {
 
     const meta = document.createElement("p");
     meta.className = "meta";
-    meta.textContent = `${comment.username || "unknown"} | Puan: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
+    meta.textContent = `${comment.username || "unknown"} | Rating: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
 
     item.append(text, meta);
 
@@ -123,7 +123,7 @@ function renderCommentItem(comment) {
 }
 
 function renderStadium(stadium, insights) {
-    stadiumPageTitle.textContent = stadium.name || "Stadyum detayi";
+    stadiumPageTitle.textContent = stadium.name || "Stadium detail";
     stadiumName.textContent = stadium.name || "-";
     stadiumCountryCity.textContent = `${stadium.country?.name || "Unknown country"} | ${stadium.city || "Unknown city"}`;
     stadiumTeams.textContent = renderTeams(stadium);

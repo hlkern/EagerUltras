@@ -34,7 +34,7 @@ function createStadiumCard(stadium) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "ghost";
-    button.textContent = "Stadyuma git";
+    button.textContent = "Go to stadium";
     button.addEventListener("click", () => {
         if (!stadium?.name) return;
         window.location.href = `/stadyum/${toSlug(stadium.name)}`;
@@ -45,7 +45,7 @@ function createStadiumCard(stadium) {
 }
 
 function renderTeam(team) {
-    teamPageTitle.textContent = team.name || "Takim detayi";
+    teamPageTitle.textContent = team.name || "Team detail";
     teamName.textContent = team.name || "-";
 
     if (team.country?.name) {
@@ -58,7 +58,7 @@ function renderTeam(team) {
     teamStadiums.innerHTML = "";
     const stadiums = Array.isArray(team.stadiums) ? team.stadiums : [];
     if (stadiums.length === 0) {
-        teamStadiums.innerHTML = '<div class="empty">Bu takim icin stadyum bilgisi bulunamadi.</div>';
+        teamStadiums.innerHTML = '<div class="empty">No stadium information was found for this team.</div>';
     } else {
         stadiums.forEach((stadium) => teamStadiums.appendChild(createStadiumCard(stadium)));
     }

@@ -18,14 +18,14 @@
         <p>Groundhoopers app</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
-        <a href="/map.html" class="sidebar-link" data-nav="map">Harita</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
+        <a href="/map.html" class="sidebar-link" data-nav="map">Map</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
     </nav>
 </aside>
 
@@ -39,7 +39,7 @@
             </button>
             <div>
                 <p class="tiny">GROUNDHOOPERS APP</p>
-                <h1 id="profileTitle">Kullanici profili</h1>
+                <h1 id="profileTitle">User profile</h1>
             </div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
@@ -49,38 +49,38 @@
         <div class="profile-top-row">
             <div>
                 <h3 id="profileUsername">-</h3>
-                <p class="stadium-card-meta">Gittigi maclar, puanlar, yorumlar ve wishlist</p>
+                <p class="stadium-card-meta">Matches, ratings, comments, and wishlist</p>
             </div>
             <div class="profile-actions">
-                <button id="profileChatBtn" class="ghost" type="button">Sohbete git</button>
+                <button id="profileChatBtn" class="ghost" type="button">Go to chat</button>
                 <button id="followActionBtn" class="ghost hidden" type="button"></button>
                 <p id="followActionInfo" class="stadium-card-meta hidden"></p>
             </div>
         </div>
         <div class="profile-stats">
             <div class="profile-stat-box">
-                <span>Takipci</span>
+                <span>Followers</span>
                 <strong id="profileFollowerCount">0</strong>
             </div>
             <div class="profile-stat-box">
-                <span>Takip edilen</span>
+                <span>Following</span>
                 <strong id="profileFollowingCount">0</strong>
             </div>
         </div>
     </section>
 
     <section class="card">
-        <h3>Maclar</h3>
+        <h3>Matches</h3>
         <div id="profileMatches" class="cards-grid"></div>
     </section>
 
     <section class="card">
-        <h3>Verdigi puanlar</h3>
+        <h3>Ratings</h3>
         <div id="profileRatings" class="cards-grid"></div>
     </section>
 
     <section class="card">
-        <h3>Yorumlari</h3>
+        <h3>Comments</h3>
         <div id="profileComments" class="cards-grid"></div>
     </section>
 
@@ -90,8 +90,8 @@
     </section>
 
     <section id="profileError" class="card hidden">
-        <h3>Kullanici bulunamadi</h3>
-        <p>Bu profile ulasilamadi.</p>
+        <h3>User not found</h3>
+        <p>This profile could not be reached.</p>
     </section>
 </main>
 

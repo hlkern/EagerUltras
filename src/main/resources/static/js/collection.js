@@ -16,7 +16,7 @@ function formatMatchAt(matchAt) {
     if (!matchAt) return "-";
     const dt = new Date(matchAt);
     if (Number.isNaN(dt.getTime())) return matchAt;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -41,11 +41,11 @@ function createSummaryCard(titleText, count, latestYear) {
 
     const line1 = document.createElement("p");
     line1.className = "stadium-card-meta";
-    line1.textContent = `${count} kez gidildi`;
+    line1.textContent = `${count} visits`;
 
     const line2 = document.createElement("p");
     line2.className = "stadium-card-meta";
-    line2.textContent = `Son gidilen yil: ${latestYear ?? "-"}`;
+    line2.textContent = `Latest visit year: ${latestYear ?? "-"}`;
 
     card.append(title, line1, line2);
     return card;
@@ -80,7 +80,7 @@ function openEditModal(match) {
     form.className = "match-edit-form";
 
     const ratingLabel = document.createElement("label");
-    ratingLabel.textContent = "Stadyum puani (1-10)";
+    ratingLabel.textContent = "Stadium rating (1-10)";
     const ratingInput = document.createElement("input");
     ratingInput.type = "number";
     ratingInput.min = "1";
@@ -89,7 +89,7 @@ function openEditModal(match) {
     ratingLabel.appendChild(ratingInput);
 
     const commentLabel = document.createElement("label");
-    commentLabel.textContent = "Yorum";
+    commentLabel.textContent = "Comment";
     const commentInput = document.createElement("textarea");
     commentInput.rows = 4;
     commentInput.value = match.comment || "";
@@ -104,12 +104,12 @@ function openEditModal(match) {
     const saveBtn = document.createElement("button");
     saveBtn.className = "ghost";
     saveBtn.type = "submit";
-    saveBtn.textContent = "Kaydet";
+    saveBtn.textContent = "Save";
 
     const cancelBtn = document.createElement("button");
     cancelBtn.className = "ghost";
     cancelBtn.type = "button";
-    cancelBtn.textContent = "Iptal";
+    cancelBtn.textContent = "Cancel";
 
     actions.append(saveBtn, cancelBtn);
     form.append(ratingLabel, commentLabel, actions, status);
@@ -141,7 +141,7 @@ function openEditModal(match) {
 
         const userId = getCurrentUserId();
         if (!userId) {
-            status.textContent = "Kullanici bilgisi bulunamadi.";
+            status.textContent = "User information could not be found.";
             return;
         }
 
@@ -150,7 +150,7 @@ function openEditModal(match) {
         if (ratingValue) {
             stadiumRating = Number.parseInt(ratingValue, 10);
             if (Number.isNaN(stadiumRating) || stadiumRating < 1 || stadiumRating > 10) {
-                status.textContent = "Puan 1 ile 10 arasinda olmali.";
+                status.textContent = "Rating must be between 1 and 10.";
                 return;
             }
         }
@@ -170,7 +170,7 @@ function openEditModal(match) {
 
             const data = await response.json().catch(() => null);
             if (!response.ok) {
-                status.textContent = data?.message || data?.error || "Mac guncellenemedi.";
+                status.textContent = data?.message || data?.error || "The match could not be updated.";
                 return;
             }
 
@@ -178,7 +178,7 @@ function openEditModal(match) {
             renderCollection(collectionState);
             closeEditModal();
         } catch (error) {
-            status.textContent = error.message || "Mac guncellenemedi.";
+            status.textContent = error.message || "The match could not be updated.";
         } finally {
             saveBtn.disabled = false;
         }
@@ -198,15 +198,15 @@ function createMatchCard(match) {
 
     const line2 = document.createElement("p");
     line2.className = "stadium-card-meta";
-    line2.textContent = `Tarih: ${formatMatchAt(match.matchAt)}`;
+    line2.textContent = `Date: ${formatMatchAt(match.matchAt)}`;
 
     const line3 = document.createElement("p");
     line3.className = "stadium-card-meta";
-    line3.textContent = `Puan: ${match.stadiumRating ?? "-"}`;
+    line3.textContent = `Rating: ${match.stadiumRating ?? "-"}`;
 
     const line4 = document.createElement("p");
     line4.className = "stadium-card-meta";
-    line4.textContent = `Yorum: ${match.comment || "-"}`;
+    line4.textContent = `Comment: ${match.comment || "-"}`;
 
     const status = document.createElement("p");
     status.className = "stadium-card-meta";
@@ -217,12 +217,12 @@ function createMatchCard(match) {
     const editBtn = document.createElement("button");
     editBtn.className = "ghost";
     editBtn.type = "button";
-    editBtn.textContent = "Duzenle";
+    editBtn.textContent = "Edit";
 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "ghost";
     deleteBtn.type = "button";
-    deleteBtn.textContent = "Sil";
+    deleteBtn.textContent = "Delete";
 
     actionRow.append(editBtn, deleteBtn);
 
@@ -234,11 +234,11 @@ function createMatchCard(match) {
     deleteBtn.addEventListener("click", async () => {
         const userId = getCurrentUserId();
         if (!userId) {
-            status.textContent = "Kullanici bilgisi bulunamadi.";
+            status.textContent = "User information could not be found.";
             return;
         }
 
-        if (!window.confirm("Bu maci koleksiyondan silmek istiyor musun?")) {
+        if (!window.confirm("Do you want to delete this match from your collection?")) {
             return;
         }
 
@@ -247,14 +247,14 @@ function createMatchCard(match) {
             const response = await fetch(`/api/users/${userId}/matches/${match.id}`, { method: "DELETE" });
             if (!response.ok && response.status !== 204) {
                 const payload = await response.json().catch(() => null);
-                status.textContent = payload?.message || payload?.error || "Mac silinemedi.";
+                status.textContent = payload?.message || payload?.error || "The match could not be deleted.";
                 return;
             }
 
             collectionState = collectionState.filter((item) => item.id !== match.id);
             renderCollection(collectionState);
         } catch (error) {
-            status.textContent = error.message || "Mac silinemedi.";
+            status.textContent = error.message || "The match could not be deleted.";
         } finally {
             deleteBtn.disabled = false;
         }
@@ -295,11 +295,11 @@ function renderTeamSummary(matches) {
 
     teamSummaryList.innerHTML = "";
     if (rows.length === 0) {
-        teamSummaryInfo.textContent = "Takim ozeti olusmadi.";
+        teamSummaryInfo.textContent = "No team summary yet.";
         return;
     }
 
-    teamSummaryInfo.textContent = `${rows.length} takim bulundu.`;
+    teamSummaryInfo.textContent = `${rows.length} teams found.`;
     rows.forEach((row) => teamSummaryList.appendChild(createSummaryCard(row.name, row.count, row.latestYear)));
 }
 
@@ -331,11 +331,11 @@ function renderStadiumSummary(matches) {
 
     stadiumSummaryList.innerHTML = "";
     if (rows.length === 0) {
-        stadiumSummaryInfo.textContent = "Stadyum ozeti olusmadi.";
+        stadiumSummaryInfo.textContent = "No stadium summary yet.";
         return;
     }
 
-    stadiumSummaryInfo.textContent = `${rows.length} stadyum bulundu.`;
+    stadiumSummaryInfo.textContent = `${rows.length} stadiums found.`;
     rows.forEach((row) => stadiumSummaryList.appendChild(createSummaryCard(row.name, row.count, row.latestYear)));
 }
 
@@ -345,15 +345,15 @@ function renderCollection(matches) {
     collectionList.innerHTML = "";
 
     if (!Array.isArray(matches) || matches.length === 0) {
-        collectionInfo.textContent = "Henuz mac koleksiyonun bos.";
-        if (teamSummaryInfo) teamSummaryInfo.textContent = "Takim ozeti yok.";
-        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Stadyum ozeti yok.";
+        collectionInfo.textContent = "Your match collection is empty.";
+        if (teamSummaryInfo) teamSummaryInfo.textContent = "No team summary.";
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "No stadium summary.";
         if (teamSummaryList) teamSummaryList.innerHTML = "";
         if (stadiumSummaryList) stadiumSummaryList.innerHTML = "";
         return;
     }
 
-    collectionInfo.textContent = `${matches.length} mac listelendi.`;
+    collectionInfo.textContent = `${matches.length} matches listed.`;
     matches.forEach((match) => collectionList.appendChild(createMatchCard(match)));
 
     renderTeamSummary(matches);
@@ -365,22 +365,22 @@ async function loadCollection() {
 
     const userId = getCurrentUserId();
     if (!userId) {
-        collectionInfo.textContent = "Kullanici bilgisi bulunamadi.";
-        if (teamSummaryInfo) teamSummaryInfo.textContent = "Kullanici bilgisi bulunamadi.";
-        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Kullanici bilgisi bulunamadi.";
+        collectionInfo.textContent = "User information could not be found.";
+        if (teamSummaryInfo) teamSummaryInfo.textContent = "User information could not be found.";
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "User information could not be found.";
         return;
     }
 
-    collectionInfo.textContent = "Yukleniyor...";
-    if (teamSummaryInfo) teamSummaryInfo.textContent = "Yukleniyor...";
-    if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Yukleniyor...";
+    collectionInfo.textContent = "Loading...";
+    if (teamSummaryInfo) teamSummaryInfo.textContent = "Loading...";
+    if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Loading...";
 
     try {
         const response = await fetch(`/api/users/${userId}/matches`);
         const data = await response.json();
 
         if (!response.ok) {
-            const message = data?.message || data?.error || "Mac koleksiyonu yuklenemedi.";
+            const message = data?.message || data?.error || "The match collection could not be loaded.";
             collectionInfo.textContent = message;
             if (teamSummaryInfo) teamSummaryInfo.textContent = message;
             if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
@@ -390,7 +390,7 @@ async function loadCollection() {
         collectionState = Array.isArray(data) ? data : [];
         renderCollection(collectionState);
     } catch (error) {
-        const message = error.message || "Mac koleksiyonu yuklenemedi.";
+        const message = error.message || "The match collection could not be loaded.";
         collectionInfo.textContent = message;
         if (teamSummaryInfo) teamSummaryInfo.textContent = message;
         if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;

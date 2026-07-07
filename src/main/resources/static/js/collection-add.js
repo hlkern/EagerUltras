@@ -13,7 +13,7 @@ let allTeams = [];
 
 function fillTeamSelect(selectEl, teams, placeholderText) {
     if (!selectEl) return;
-    selectEl.innerHTML = `<option value="">${placeholderText || "Takim sec"}</option>`;
+    selectEl.innerHTML = `<option value="">${placeholderText || "Select team"}</option>`;
     (teams || []).forEach((team) => {
         const option = document.createElement("option");
         option.value = String(team.id);
@@ -25,14 +25,14 @@ function fillTeamSelect(selectEl, teams, placeholderText) {
 function updateAwayTeams() {
     const homeTeamId = Number(matchHomeTeamId?.value || 0);
     const awayCandidates = allTeams.filter((team) => team.id !== homeTeamId);
-    fillTeamSelect(matchAwayTeamId, awayCandidates, "Deplasman takim sec");
+    fillTeamSelect(matchAwayTeamId, awayCandidates, "Select away team");
 }
 
 function onStadiumChanged() {
     const stadiumId = Number(matchStadiumId?.value || 0);
     const selectedStadium = stadiumIndex.get(stadiumId);
     const teams = selectedStadium?.teams || [];
-    fillTeamSelect(matchHomeTeamId, teams, "Ev sahibi takim sec");
+    fillTeamSelect(matchHomeTeamId, teams, "Select home team");
     updateAwayTeams();
 }
 
@@ -52,7 +52,7 @@ async function initMatchForm(stadiums) {
     if (!matchForm || !matchStadiumId) return;
 
     stadiumIndex = new Map((stadiums || []).map((s) => [s.id, s]));
-    matchStadiumId.innerHTML = '<option value="">Stadyum sec</option>';
+    matchStadiumId.innerHTML = '<option value="">Select stadium</option>';
 
     stadiums
         .toSorted((a, b) => (a.name || "").localeCompare(b.name || ""))
@@ -65,8 +65,8 @@ async function initMatchForm(stadiums) {
 
     await loadAllTeams();
 
-    fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
-    fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
+    fillTeamSelect(matchHomeTeamId, [], "Select home team");
+    fillTeamSelect(matchAwayTeamId, allTeams, "Select away team");
 
     matchStadiumId.addEventListener("change", onStadiumChanged);
     matchHomeTeamId?.addEventListener("change", updateAwayTeams);
@@ -76,7 +76,7 @@ async function initMatchForm(stadiums) {
 
         const userId = window.HoopAroundLayout?.user?.id;
         if (!userId) {
-            if (matchFormInfo) matchFormInfo.textContent = "Kullanici bilgisi bulunamadi.";
+            if (matchFormInfo) matchFormInfo.textContent = "User information could not be found.";
             return;
         }
 
@@ -90,12 +90,12 @@ async function initMatchForm(stadiums) {
         };
 
         if (!payload.stadiumId || !payload.homeTeamId || !payload.awayTeamId || !payload.matchAt) {
-            if (matchFormInfo) matchFormInfo.textContent = "Lutfen gerekli alanlari doldur.";
+            if (matchFormInfo) matchFormInfo.textContent = "Please fill in the required fields.";
             return;
         }
 
         if (payload.homeTeamId === payload.awayTeamId) {
-            if (matchFormInfo) matchFormInfo.textContent = "Ev sahibi ve deplasman takimlari farkli olmali.";
+            if (matchFormInfo) matchFormInfo.textContent = "Home and away teams must be different.";
             return;
         }
 
@@ -112,17 +112,17 @@ async function initMatchForm(stadiums) {
 
             if (!response.ok) {
                 if (matchFormInfo) {
-                    matchFormInfo.textContent = body?.message || body?.error || "Mac koleksiyona eklenemedi.";
+                    matchFormInfo.textContent = body?.message || body?.error || "The match could not be added to your collection.";
                 }
                 return;
             }
 
-            if (matchFormInfo) matchFormInfo.textContent = "Mac koleksiyona eklendi!";
+            if (matchFormInfo) matchFormInfo.textContent = "Match added to your collection!";
             matchForm.reset();
-            fillTeamSelect(matchHomeTeamId, [], "Ev sahibi takim sec");
-            fillTeamSelect(matchAwayTeamId, allTeams, "Deplasman takim sec");
+            fillTeamSelect(matchHomeTeamId, [], "Select home team");
+            fillTeamSelect(matchAwayTeamId, allTeams, "Select away team");
         } catch (error) {
-            if (matchFormInfo) matchFormInfo.textContent = error.message || "Mac koleksiyona eklenemedi.";
+            if (matchFormInfo) matchFormInfo.textContent = error.message || "The match could not be added to your collection.";
         } finally {
             if (matchSubmitBtn) matchSubmitBtn.disabled = false;
         }
@@ -130,18 +130,18 @@ async function initMatchForm(stadiums) {
 }
 
 async function loadStadiums() {
-    if (matchFormInfo) matchFormInfo.textContent = "Stadyumlar yukleniyor...";
+    if (matchFormInfo) matchFormInfo.textContent = "Loading stadiums...";
     try {
         const response = await fetch("/api/stadiums");
         const data = await response.json();
         if (!response.ok || !Array.isArray(data) || data.length === 0) {
-            if (matchFormInfo) matchFormInfo.textContent = "Stadyum verisi yuklenemedi.";
+            if (matchFormInfo) matchFormInfo.textContent = "Stadium data could not be loaded.";
             return;
         }
         if (matchFormInfo) matchFormInfo.textContent = "";
         await initMatchForm(data);
     } catch {
-        if (matchFormInfo) matchFormInfo.textContent = "Stadyum verisi yuklenemedi.";
+        if (matchFormInfo) matchFormInfo.textContent = "Stadium data could not be loaded.";
     }
 }
 

@@ -30,7 +30,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -57,7 +57,7 @@ function createMatchCard(match) {
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Tarih: ${formatDate(match.matchAt)}`;
+    date.textContent = `Date: ${formatDate(match.matchAt)}`;
 
     card.append(title, teams, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -73,11 +73,11 @@ function createRatingCard(match) {
 
     const rating = document.createElement("p");
     rating.className = "stadium-card-meta";
-    rating.textContent = `Puan: ${match.stadiumRating}`;
+    rating.textContent = `Rating: ${match.stadiumRating}`;
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Mac tarihi: ${formatDate(match.matchAt)}`;
+    date.textContent = `Match date: ${formatDate(match.matchAt)}`;
 
     card.append(title, rating, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -97,7 +97,7 @@ function createCommentCard(match) {
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Mac tarihi: ${formatDate(match.matchAt)}`;
+    date.textContent = `Match date: ${formatDate(match.matchAt)}`;
 
     card.append(title, comment, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -155,7 +155,7 @@ async function toggleFollow(data) {
         const response = await fetch(`/api/user-follows/${viewerUserId}/${data.id}`, { method });
         if (!(response.status === 204 || response.ok)) {
             const payload = await response.json().catch(() => null);
-            followActionInfo.textContent = payload?.message || payload?.error || "Takip islemi basarisiz.";
+            followActionInfo.textContent = payload?.message || payload?.error || "Follow action failed.";
             followActionInfo.classList.remove("hidden");
             return;
         }
@@ -164,9 +164,9 @@ async function toggleFollow(data) {
         data.followerCount = Number(data.followerCount || 0) + (data.followedByViewer ? 1 : -1);
         if (data.followerCount < 0) data.followerCount = 0;
         renderFollowSummary(data);
-        followActionBtn.textContent = data.followedByViewer ? "Takibi birak" : "Takip et";
+        followActionBtn.textContent = data.followedByViewer ? "Unfollow" : "Follow";
     } catch {
-        followActionInfo.textContent = "Takip islemi basarisiz.";
+        followActionInfo.textContent = "Follow action failed.";
         followActionInfo.classList.remove("hidden");
     } finally {
         followActionBtn.disabled = false;
@@ -184,14 +184,14 @@ function renderFollowActions(data) {
     if (!canFollow) {
         followActionBtn.classList.add("hidden");
         followActionBtn.onclick = null;
-        followActionInfo.textContent = data.ownProfile ? "Kendi profilin" : "Takip icin giris gerekli";
+        followActionInfo.textContent = data.ownProfile ? "This is your profile" : "Log in to follow";
         followActionInfo.classList.remove("hidden");
         return;
     }
 
     followActionBtn.classList.remove("hidden");
     followActionBtn.disabled = false;
-    followActionBtn.textContent = data.followedByViewer ? "Takibi birak" : "Takip et";
+    followActionBtn.textContent = data.followedByViewer ? "Unfollow" : "Follow";
     followActionBtn.onclick = () => toggleFollow(data);
 }
 
@@ -219,7 +219,7 @@ function renderProfile(data) {
     renderList(profileMatches, matches, createMatchCard, "Bu kullanicinin mac kaydi yok.");
     renderList(profileRatings, ratedMatches, createRatingCard, "Bu kullanici henuz puan vermemis.");
     renderList(profileComments, commentedMatches, createCommentCard, "Bu kullanici henuz yorum yazmamis.");
-    renderList(profileWishlist, data.wishlist, createWishlistCard, "Wishlist bos.");
+    renderList(profileWishlist, data.wishlist, createWishlistCard, "Wishlist is empty.");
 
     profileMain.classList.remove("hidden");
     profileError.classList.add("hidden");

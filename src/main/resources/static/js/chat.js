@@ -24,7 +24,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -44,7 +44,7 @@ function renderSummaryList() {
 
     chatSummaryList.innerHTML = "";
     if (!Array.isArray(state.summaries) || state.summaries.length === 0) {
-        chatSummaryList.innerHTML = '<div class="empty">Henuz sohbet yok.</div>';
+        chatSummaryList.innerHTML = '<div class="empty">No chats yet.</div>';
         return;
     }
 
@@ -58,7 +58,7 @@ function renderSummaryList() {
 
         const message = document.createElement("p");
         message.className = "stadium-card-meta";
-        message.textContent = item.lastMessage || "Mesaj yok";
+        message.textContent = item.lastMessage || "No messages";
 
         const date = document.createElement("span");
         date.className = "stadium-card-meta";
@@ -75,7 +75,7 @@ function renderMessages(messages) {
 
     chatMessages.innerHTML = "";
     if (!Array.isArray(messages) || messages.length === 0) {
-        chatMessages.innerHTML = '<div class="empty">Bu sohbette henuz mesaj yok.</div>';
+        chatMessages.innerHTML = '<div class="empty">No messages in this chat yet.</div>';
         return;
     }
 
@@ -114,7 +114,7 @@ function renderSearchResults(items) {
     state.searchUsers = items;
 
     if (!Array.isArray(items) || items.length === 0) {
-        chatUserSearchResults.innerHTML = '<div class="empty">Kullanici bulunamadi.</div>';
+        chatUserSearchResults.innerHTML = '<div class="empty">User not found.</div>';
         chatUserSearchResults.classList.remove("hidden");
         return;
     }
@@ -129,7 +129,7 @@ function renderSearchResults(items) {
 
         const meta = document.createElement("span");
         meta.className = "search-result-meta";
-        meta.textContent = item.subtitle || "Kullanici";
+        meta.textContent = item.subtitle || "User";
 
         button.append(title, meta);
         button.addEventListener("click", () => {
@@ -179,14 +179,14 @@ async function loadSummaries() {
         const data = await response.json();
 
         if (!response.ok) {
-            setInfo(data?.message || data?.error || "Sohbetler yuklenemedi.");
+            setInfo(data?.message || data?.error || "Chats could not be loaded.");
             return;
         }
 
         state.summaries = Array.isArray(data) ? data : [];
         renderSummaryList();
     } catch {
-        setInfo("Sohbetler yuklenemedi.");
+        setInfo("Chats could not be loaded.");
     }
 }
 
@@ -204,7 +204,7 @@ async function openThread(username) {
 
         if (!response.ok) {
             renderMessages([]);
-            setInfo(data?.message || data?.error || "Sohbet acilamadi.");
+            setInfo(data?.message || data?.error || "Chat could not be opened.");
             return;
         }
 
@@ -212,7 +212,7 @@ async function openThread(username) {
         setInfo("");
     } catch {
         renderMessages([]);
-        setInfo("Sohbet acilamadi.");
+        setInfo("Chat could not be opened.");
     }
 }
 
@@ -220,11 +220,11 @@ async function sendMessage() {
     const currentUser = getCurrentUser();
     const content = String(chatMessageInput?.value || "").trim();
     if (!currentUser?.id || !state.activeUsername) {
-        setInfo("Once bir kullanici sec.");
+        setInfo("Select a user first.");
         return;
     }
     if (!content) {
-        setInfo("Mesaj bos olamaz.");
+        setInfo("Message cannot be empty.");
         return;
     }
 
@@ -241,7 +241,7 @@ async function sendMessage() {
 
         const data = await response.json().catch(() => null);
         if (!response.ok) {
-            setInfo(data?.message || data?.error || "Mesaj gonderilemedi.");
+            setInfo(data?.message || data?.error || "Message could not be sent.");
             return;
         }
 
@@ -249,7 +249,7 @@ async function sendMessage() {
         await openThread(state.activeUsername);
         await loadSummaries();
     } catch {
-        setInfo("Mesaj gonderilemedi.");
+        setInfo("Message could not be sent.");
     } finally {
         chatSendBtn.disabled = false;
     }
@@ -268,7 +268,7 @@ function initNewChatActions() {
         chatStartBtn.addEventListener("click", async () => {
             const username = String(chatUserSearchInput?.value || "").trim();
             if (!username) {
-                setInfo("Kullanici adi gir.");
+                setInfo("Enter a username.");
                 return;
             }
             await openThread(username);

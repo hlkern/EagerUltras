@@ -28,7 +28,7 @@ function createWishlistCard(stadium, onRemoved) {
     removeBtn.addEventListener("click", async () => {
         const userId = getCurrentUserId();
         if (!userId) {
-            wishlistInfo.textContent = "Kullanici bilgisi bulunamadi.";
+            wishlistInfo.textContent = "User information could not be found.";
             return;
         }
 
@@ -43,9 +43,9 @@ function createWishlistCard(stadium, onRemoved) {
             }
 
             const payload = await response.json().catch(() => null);
-            wishlistInfo.textContent = payload?.message || payload?.error || "Stadyum wishlistten silinemedi.";
+            wishlistInfo.textContent = payload?.message || payload?.error || "Stadium could not be removed from wishlist.";
         } catch (error) {
-            wishlistInfo.textContent = error.message || "Stadyum wishlistten silinemedi.";
+            wishlistInfo.textContent = error.message || "Stadium could not be removed from wishlist.";
         }
     });
 
@@ -59,7 +59,7 @@ function renderWishlist(stadiums) {
     wishlistList.innerHTML = "";
 
     if (!Array.isArray(stadiums) || stadiums.length === 0) {
-        wishlistInfo.textContent = "Wishlistin bos.";
+        wishlistInfo.textContent = "Your wishlist is empty.";
         return;
     }
 
@@ -82,7 +82,7 @@ async function loadWishlist() {
 
     const userId = getCurrentUserId();
     if (!userId) {
-        wishlistInfo.textContent = "Kullanici bilgisi bulunamadi.";
+        wishlistInfo.textContent = "User information could not be found.";
         return;
     }
 
@@ -91,13 +91,13 @@ async function loadWishlist() {
         const data = await response.json();
 
         if (!response.ok) {
-            wishlistInfo.textContent = data?.message || data?.error || "Wishlist yuklenemedi.";
+            wishlistInfo.textContent = data?.message || data?.error || "Wishlist could not be loaded.";
             return;
         }
 
         renderWishlist(data);
     } catch (error) {
-        wishlistInfo.textContent = error.message || "Wishlist yuklenemedi.";
+        wishlistInfo.textContent = error.message || "Wishlist could not be loaded.";
     }
 }
 

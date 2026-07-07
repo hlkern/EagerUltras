@@ -20,7 +20,7 @@ function createTeamCard(team) {
 
     const meta = document.createElement("p");
     meta.className = "stadium-card-meta";
-    meta.textContent = "Takim detay sayfasina git";
+    meta.textContent = "Open team detail page";
 
     card.append(title, meta);
 

@@ -53,11 +53,11 @@ public class PostServiceImpl implements PostService {
     public PostResponse createPost(Long userId, String content, MultipartFile image) {
         String normalizedContent = content == null ? "" : content.trim();
         if (normalizedContent.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Icerik bos olamaz");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content cannot be empty");
         }
 
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
@@ -76,10 +76,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Map<String, Object> toggleLike(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gonderi bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Optional<PostLike> existing = postLikeRepository.findByPostIdAndUserId(postId, userId);
 
@@ -103,7 +103,7 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public List<PostCommentResponse> getComments(Long postId) {
         if (!postRepository.existsById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gonderi bulunamadi");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }
         return postCommentRepository.findAllByPostIdOrderByCreatedAtAsc(postId)
                 .stream()
@@ -116,14 +116,14 @@ public class PostServiceImpl implements PostService {
     public PostCommentResponse addComment(Long postId, Long userId, String content) {
         String normalized = content == null ? "" : content.trim();
         if (normalized.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Yorum bos olamaz");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment cannot be empty");
         }
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gonderi bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         PostComment comment = new PostComment();
         comment.setPost(post);
@@ -143,7 +143,7 @@ public class PostServiceImpl implements PostService {
             Files.copy(file.getInputStream(), uploadPath.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
             return "/uploads/" + filename;
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Fotograf yuklenemedi");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Photo could not be uploaded");
         }
     }
 

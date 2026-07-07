@@ -29,7 +29,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional(readOnly = true)
     public List<ChatSummaryResponse> listChats(Long userId) {
         User currentUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         return userConversationRepository.findByUserAIdOrUserBIdOrderByUpdatedAtDesc(currentUser.getId(), currentUser.getId())
                 .stream()
@@ -41,10 +41,10 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public List<ChatMessageResponse> getMessages(Long userId, String otherUsername) {
         User currentUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         User otherUser = userRepository.findByUsername(otherUsername)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hedef kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
 
         validateNotSelf(currentUser.getId(), otherUser.getId());
 
@@ -71,14 +71,14 @@ public class ChatServiceImpl implements ChatService {
     public ChatMessageResponse sendMessage(Long senderUserId, String recipientUsername, String content) {
         String normalizedContent = content == null ? "" : content.trim();
         if (normalizedContent.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mesaj bos olamaz");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
         }
 
         User sender = userRepository.findById(senderUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gonderen kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender user not found"));
 
         User recipient = userRepository.findByUsername(recipientUsername)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hedef kullanici bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target user not found"));
 
         validateNotSelf(sender.getId(), recipient.getId());
 
@@ -124,7 +124,7 @@ public class ChatServiceImpl implements ChatService {
         ChatSummaryResponse response = new ChatSummaryResponse();
         response.setOtherUserId(otherUser.getId());
         response.setOtherUsername(otherUser.getUsername());
-        response.setLastMessage(lastMessage != null ? lastMessage.getContent() : "Mesaj yok");
+        response.setLastMessage(lastMessage != null ? lastMessage.getContent() : "No messages");
         response.setLastMessageAt(lastMessage != null ? lastMessage.getCreatedAt() : conversation.getCreatedAt());
         response.setUnreadCount((int) Math.min(unreadCount, Integer.MAX_VALUE));
         return response;

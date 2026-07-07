@@ -99,7 +99,7 @@ function refreshStadiumList() {
     stadiumsList.innerHTML = "";
 
     if (filtered.length === 0) {
-        stadiumsList.innerHTML = '<div class="empty">Bu filtrede stadyum bulunamadi.</div>';
+        stadiumsList.innerHTML = '<div class="empty">No stadiums found for this filter.</div>';
         updateInfoText(allStadiums.length, 0);
         return;
     }
@@ -134,7 +134,7 @@ function createWishlistButton(stadiumId) {
     btn.addEventListener("click", async () => {
         const userId = getCurrentUserId();
         if (!userId) {
-            if (stadiumsInfo) stadiumsInfo.textContent = "Kullanici bilgisi bulunamadi.";
+            if (stadiumsInfo) stadiumsInfo.textContent = "User information could not be found.";
             return;
         }
 
@@ -148,10 +148,10 @@ function createWishlistButton(stadiumId) {
             if (response.status === 204 || response.ok) {
                 if (alreadyInWishlist) {
                     wishlistStadiumIds.delete(stadiumId);
-                    if (stadiumsInfo) stadiumsInfo.textContent = "Stadyum wishlist'ten cikarildi.";
+                    if (stadiumsInfo) stadiumsInfo.textContent = "Stadium removed from wishlist.";
                 } else {
                     wishlistStadiumIds.add(stadiumId);
-                    if (stadiumsInfo) stadiumsInfo.textContent = "Stadyum wishlist'e eklendi.";
+                    if (stadiumsInfo) stadiumsInfo.textContent = "Stadium added to wishlist.";
                 }
                 syncButtonState();
                 return;
@@ -168,13 +168,13 @@ function createWishlistButton(stadiumId) {
             if (response.status === 404 && alreadyInWishlist) {
                 wishlistStadiumIds.delete(stadiumId);
                 syncButtonState();
-                if (stadiumsInfo) stadiumsInfo.textContent = "Stadyum zaten wishlistte degildi.";
+                if (stadiumsInfo) stadiumsInfo.textContent = "The stadium was not in your wishlist.";
                 return;
             }
 
-            if (stadiumsInfo) stadiumsInfo.textContent = payload?.message || payload?.error || "Wishlist islemi basarisiz.";
+            if (stadiumsInfo) stadiumsInfo.textContent = payload?.message || payload?.error || "Wishlist action failed.";
         } catch (error) {
-            if (stadiumsInfo) stadiumsInfo.textContent = error.message || "Wishlist islemi basarisiz.";
+            if (stadiumsInfo) stadiumsInfo.textContent = error.message || "Wishlist action failed.";
         }
     });
 
@@ -185,7 +185,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -262,7 +262,7 @@ function createReactionBar(comment) {
         const target = previous === next ? null : next;
         const changed = await saveCommentReaction(comment.matchId, target);
         if (!changed) {
-            if (stadiumsInfo) stadiumsInfo.textContent = "Yorum reaksiyonu kaydedilemedi.";
+            if (stadiumsInfo) stadiumsInfo.textContent = "Comment reaction could not be saved.";
             return;
         }
 
@@ -292,7 +292,7 @@ function createCommentItem(comment) {
 
     const meta = document.createElement("p");
     meta.className = "meta";
-    meta.textContent = `${comment.username || "unknown"} | Puan: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
+    meta.textContent = `${comment.username || "unknown"} | Rating: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}`;
 
     item.append(text, meta);
 
@@ -312,11 +312,11 @@ function createInsightsSection(stadiumId) {
     rating.textContent = "Ortalama puan: -";
 
     const title = document.createElement("h5");
-    title.textContent = "Yorumlar";
+    title.textContent = "Comments";
 
     const comments = document.createElement("div");
     comments.className = "stadium-comments";
-    comments.innerHTML = '<div class="empty">Yukleniyor...</div>';
+    comments.innerHTML = '<div class="empty">Loading...</div>';
 
     wrapper.append(rating, title, comments);
 
@@ -327,7 +327,7 @@ function createInsightsSection(stadiumId) {
 
         const insights = await fetchStadiumInsights(stadiumId);
         if (!insights) {
-            comments.innerHTML = '<div class="error">Yorumlar yuklenemedi.</div>';
+            comments.innerHTML = '<div class="error">Comments could not be loaded.</div>';
             loaded = true;
             return;
         }

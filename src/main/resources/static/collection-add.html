@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HoopAround | Mac Ekle</title>
+    <title>HoopAround | Add Match</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -24,15 +24,15 @@
         <p>Groundhoopers app</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Ana sayfa</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Ulkeler</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadlar</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Takimlar</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
         <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">Koleksiyonum</a>
-        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Mac Ekle</a>
-        <a href="/map.html" class="sidebar-link" data-nav="map">Harita</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Sohbet</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
+        <a href="/collection-add.html" class="sidebar-link" data-nav="collection-add">Add Match</a>
+        <a href="/map.html" class="sidebar-link" data-nav="map">Map</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
     </nav>
 </aside>
 
@@ -52,41 +52,41 @@
 
     <section class="card">
         <div class="section-head">
-            <h3>Koleksiyona mac ekle</h3>
-            <p>Stadyum, takimlar, tarih-saat, puan ve yorum gir.</p>
+            <h3>Add a match to your collection</h3>
+            <p>Choose the stadium, teams, date, rating, and comment.</p>
         </div>
         <form id="matchForm" class="match-form">
             <label>
-                Stadyum
+                Stadium
                 <select id="matchStadiumId" required>
-                    <option value="">Stadyum sec</option>
+                    <option value="">Select stadium</option>
                 </select>
             </label>
             <label>
-                Ev sahibi takim
+                Home team
                 <select id="matchHomeTeamId" required>
-                    <option value="">Takim sec</option>
+                    <option value="">Select team</option>
                 </select>
             </label>
             <label>
-                Deplasman takim
+                Away team
                 <select id="matchAwayTeamId" required>
-                    <option value="">Takim sec</option>
+                    <option value="">Select team</option>
                 </select>
             </label>
             <label>
-                Mac tarihi ve saati
+                Match date and time
                 <input id="matchAt" type="datetime-local" required />
             </label>
             <label>
-                Stadyum puani (1-10)
+                Stadium rating (1-10)
                 <input id="matchRating" type="number" min="1" max="10" />
             </label>
             <label class="full-width">
-                Yorum
-                <textarea id="matchComment" rows="3" placeholder="Mac deneyimini yaz..."></textarea>
+                Comment
+                <textarea id="matchComment" rows="3" placeholder="Write about your match experience..."></textarea>
             </label>
-            <button id="matchSubmitBtn" class="ghost" type="submit">Maci koleksiyona ekle</button>
+            <button id="matchSubmitBtn" class="ghost" type="submit">Add match to collection</button>
         </form>
         <p id="matchFormInfo" class="stadium-card-meta"></p>
     </section>

@@ -39,7 +39,7 @@ function renderSearchResults(items) {
     activeSearchIndex = -1;
 
     if (!Array.isArray(items) || items.length === 0) {
-        globalSearchResults.innerHTML = '<div class="empty">Sonuc bulunamadi.</div>';
+        globalSearchResults.innerHTML = '<div class="empty">No results found.</div>';
         globalSearchResults.classList.remove("hidden");
         return;
     }
@@ -143,7 +143,7 @@ function formatMatchDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -181,7 +181,7 @@ async function loadDashboardHighlights() {
     try {
         const response = await fetch(`/api/users/${userId}/dashboard-highlights`);
         if (!response.ok) {
-            throw new Error("Highlights yuklenemedi");
+            throw new Error("Highlights could not be loaded");
         }
 
         const data = await response.json();
@@ -204,14 +204,14 @@ async function loadDashboardHighlights() {
             }
             bindCardToStadium(latestWishlistCard, data.latestWishlistStadium);
         } else if (latestWishlistText) {
-            latestWishlistText.textContent = "Wishlist'e henuz stad eklenmedi.";
+            latestWishlistText.textContent = "No stadiums added to your wishlist yet.";
         }
     } catch {
         if (latestVisitedText) {
-            latestVisitedText.textContent = "Son ziyaret bilgisi yuklenemedi.";
+            latestVisitedText.textContent = "Latest visit information could not be loaded.";
         }
         if (latestWishlistText) {
-            latestWishlistText.textContent = "Wishlist bilgisi yuklenemedi.";
+            latestWishlistText.textContent = "Wishlist information could not be loaded.";
         }
     }
 }
@@ -220,7 +220,7 @@ function formatPostDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("tr-TR", {
+    return dt.toLocaleString("en-US", {
         day: "2-digit", month: "2-digit", year: "numeric",
         hour: "2-digit", minute: "2-digit"
     });
@@ -253,7 +253,7 @@ function buildPostCard(post) {
         const img = document.createElement("img");
         img.src = post.imageUrl;
         img.className = "timeline-post-img clickable-img";
-        img.alt = "Gonderi gorseli";
+        img.alt = "Post image";
         img.addEventListener("click", () => openLightbox(post.imageUrl));
         article.appendChild(img);
     }
@@ -283,13 +283,13 @@ function buildPostCard(post) {
 
     const commentList = document.createElement("div");
     commentList.className = "comment-list";
-    commentList.innerHTML = '<p class="stadium-card-meta">Yukleniyor...</p>';
+    commentList.innerHTML = '<p class="stadium-card-meta">Loading...</p>';
 
     const commentForm = document.createElement("form");
     commentForm.className = "comment-form";
     commentForm.innerHTML = `
-        <input type="text" class="comment-input" placeholder="Yorum yaz..." maxlength="1000" />
-        <button type="submit" class="ghost comment-submit">Gonder</button>
+        <input type="text" class="comment-input" placeholder="Write a comment..." maxlength="1000" />
+        <button type="submit" class="ghost comment-submit">Send</button>
     `;
     commentForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -322,11 +322,11 @@ function buildPostCard(post) {
 }
 
 async function loadComments(postId, listEl) {
-    listEl.innerHTML = '<p class="stadium-card-meta">Yukleniyor...</p>';
+    listEl.innerHTML = '<p class="stadium-card-meta">Loading...</p>';
     try {
         const resp = await fetch(`/api/posts/${postId}/comments`);
         if (!resp.ok) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Yorumlar yuklenemedi.</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">Comments could not be loaded.</p>';
             return;
         }
         const comments = await resp.json();
@@ -342,7 +342,7 @@ async function loadComments(postId, listEl) {
             listEl.appendChild(div);
         });
     } catch {
-        listEl.innerHTML = '<p class="stadium-card-meta">Yorumlar yuklenemedi.</p>';
+        listEl.innerHTML = '<p class="stadium-card-meta">Comments could not be loaded.</p>';
     }
 }
 
@@ -390,7 +390,7 @@ async function loadTimeline() {
         const url = userId ? `/api/posts?userId=${userId}` : "/api/posts";
         const response = await fetch(url);
         if (!response.ok) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Timeline yuklenemedi.</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">Timeline could not be loaded.</p>';
             return;
         }
 
@@ -403,7 +403,7 @@ async function loadTimeline() {
         listEl.innerHTML = "";
         posts.forEach((post) => listEl.appendChild(buildPostCard(post)));
     } catch {
-        listEl.innerHTML = '<p class="stadium-card-meta">Timeline yuklenemedi.</p>';
+        listEl.innerHTML = '<p class="stadium-card-meta">Timeline could not be loaded.</p>';
     }
 }
 
@@ -513,13 +513,13 @@ function initFab() {
         const content = postContent?.value?.trim();
         if (!userId) {
             if (postFormInfo) {
-                postFormInfo.textContent = "Kullanici bilgisi bulunamadi.";
+                postFormInfo.textContent = "User information could not be found.";
             }
             return;
         }
         if (!content) {
             if (postFormInfo) {
-                postFormInfo.textContent = "Icerik bos olamaz.";
+                postFormInfo.textContent = "Content cannot be empty.";
             }
             return;
         }
@@ -545,7 +545,7 @@ function initFab() {
             const data = await response.json().catch(() => null);
             if (!response.ok) {
                 if (postFormInfo) {
-                    postFormInfo.textContent = data?.message || data?.error || "Gonderi yayinlanamadi.";
+                    postFormInfo.textContent = data?.message || data?.error || "Post could not be published.";
                 }
                 return;
             }
@@ -554,7 +554,7 @@ function initFab() {
             await loadTimeline();
         } catch {
             if (postFormInfo) {
-                postFormInfo.textContent = "Gonderi yayinlanamadi.";
+                postFormInfo.textContent = "Post could not be published.";
             }
         } finally {
             if (postSubmitBtn) {
@@ -572,7 +572,7 @@ async function loadNotifications() {
     try {
         const response = await fetch(`/api/chats/${userId}`);
         if (!response.ok) {
-            listEl.innerHTML = '<p class="stadium-card-meta">Bildirimler yuklenemedi.</p>';
+            listEl.innerHTML = '<p class="stadium-card-meta">Notifications could not be loaded.</p>';
             return;
         }
 
@@ -605,7 +605,7 @@ async function loadNotifications() {
             listEl.appendChild(item);
         });
     } catch {
-        listEl.innerHTML = '<p class="stadium-card-meta">Bildirimler yuklenemedi.</p>';
+        listEl.innerHTML = '<p class="stadium-card-meta">Notifications could not be loaded.</p>';
     }
 }
 
@@ -620,7 +620,7 @@ function openPostDetail(post) {
 
     const imgWrap = document.getElementById("postDetailImage");
     if (post.imageUrl) {
-        imgWrap.innerHTML = `<img src="${post.imageUrl}" class="timeline-post-img clickable-img" alt="Gonderi gorseli" style="margin-bottom:4px;" />`;
+        imgWrap.innerHTML = `<img src="${post.imageUrl}" class="timeline-post-img clickable-img" alt="Post image" style="margin-bottom:4px;" />`;
         imgWrap.querySelector("img").addEventListener("click", () => openLightbox(post.imageUrl));
         imgWrap.classList.remove("hidden");
     } else {

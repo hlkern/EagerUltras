@@ -46,14 +46,14 @@ public class UserFollowServiceImpl implements UserFollowService {
         validateNotSelf(followerUserId, followingUserId);
 
         UserFollow follow = userFollowRepository.findByFollowerIdAndFollowingId(followerUserId, followingUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Takip kaydi bulunamadi"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follow record not found"));
 
         userFollowRepository.delete(follow);
     }
 
     private void validateNotSelf(Long followerUserId, Long followingUserId) {
         if (followerUserId == null || followingUserId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kullanici id zorunlu");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required");
         }
         if (followerUserId.equals(followingUserId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kendini takip edemezsin");
