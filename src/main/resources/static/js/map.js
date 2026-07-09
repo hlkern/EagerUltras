@@ -23,17 +23,27 @@ function markerType(stadiumId, visitedSet, wishlistSet) {
     return "other";
 }
 
-function makeCircle(stadium, type) {
+function buildMarkerIcon(type) {
+    const color = COLORS[type] || COLORS.other;
+    return L.divIcon({
+        className: "stadium-emoji-marker-wrap",
+        html: `
+            <div class="stadium-emoji-marker" style="background:${color.fill}; border-color:${color.stroke};">
+                <span>🏟️</span>
+            </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+    });
+}
+
+function makeMarker(stadium, type) {
     if (!stadium.latitude || !stadium.longitude) return null;
 
-    const { fill, stroke } = COLORS[type];
-    const circle = L.circleMarker([stadium.latitude, stadium.longitude], {
-        radius: type === "other" ? 6 : 9,
-        fillColor: fill,
-        color: stroke,
-        weight: 2,
-        opacity: 1,
-        fillOpacity: type === "other" ? 0.5 : 0.9
+    const marker = L.marker([stadium.latitude, stadium.longitude], {
+        icon: buildMarkerIcon(type),
+        keyboard: true
     });
 
     const teams = (stadium.teams || []).map((team) => team.name).filter(Boolean).join(", ") || "-";
@@ -43,7 +53,7 @@ function makeCircle(stadium, type) {
             ? '<span style="color:#7ab8ff;font-weight:700;">Wishlist</span>'
             : "";
 
-    circle.bindPopup(`
+    marker.bindPopup(`
         <div style="min-width:160px;font-family:Inter,sans-serif;font-size:13px;">
             <strong style="font-size:14px;cursor:pointer;text-decoration:underline;color:#fff;"
                     onclick="openStadiumModal(${stadium.id})">${stadium.name || "Stadium"}</strong><br/>
@@ -55,16 +65,23 @@ function makeCircle(stadium, type) {
         </div>
     `);
 
-    return circle;
+    marker.on("click", () => {
+        map.flyTo([stadium.latitude, stadium.longitude], 14, {
+            animate: true,
+            duration: 0.8
+        });
+    });
+
+    return marker;
 }
 
 function applyFilter(filter) {
     activeFilter = filter;
-    allMarkers.forEach(({ circle, type }) => {
+    allMarkers.forEach(({ marker, type }) => {
         if (filter === "all" || filter === type) {
-            map.addLayer(circle);
+            map.addLayer(marker);
         } else {
-            map.removeLayer(circle);
+            map.removeLayer(marker);
         }
     });
 
@@ -98,10 +115,10 @@ async function loadMap() {
 
         allMarkers = validStadiums.map((stadium) => {
             const type = markerType(stadium.id, visitedIds, wishlistIds);
-            const circle = makeCircle(stadium, type);
-            if (circle) circle.addTo(map);
-            return { circle, type, stadium };
-        }).filter((marker) => marker.circle);
+            const marker = makeMarker(stadium, type);
+            if (marker) marker.addTo(map);
+            return { marker, type, stadium };
+        }).filter((marker) => marker.marker);
 
         const visitedCount = allMarkers.filter((marker) => marker.type === "visited").length;
         const wishlistCount = allMarkers.filter((marker) => marker.type === "wishlist").length;
@@ -113,7 +130,7 @@ async function loadMap() {
 
         allMarkers
             .filter((marker) => marker.type !== "other")
-            .forEach((marker) => marker.circle.bringToFront());
+            .forEach((marker) => marker.marker.setZIndexOffset(1000));
     } catch (err) {
         if (mapInfo) mapInfo.textContent = "Map could not be loaded.";
     }
@@ -229,12 +246,12 @@ function renderWishlistBtn(stadiumId, inWishlist) {
                     if (inWishlist) {
                         wishlistIds.add(stadiumId);
                         marker.type = "wishlist";
-                        marker.circle.setStyle({ fillColor: COLORS.wishlist.fill, color: COLORS.wishlist.stroke, radius: 9, fillOpacity: 0.9 });
                     } else {
                         wishlistIds.delete(stadiumId);
                         marker.type = "other";
-                        marker.circle.setStyle({ fillColor: COLORS.other.fill, color: COLORS.other.stroke, radius: 6, fillOpacity: 0.5 });
                     }
+                    marker.marker.setIcon(buildMarkerIcon(marker.type));
+                    marker.marker.setZIndexOffset(marker.type === "other" ? 0 : 1000);
                 }
 
                 btn.textContent = inWishlist ? "Remove from wishlist" : "Add to wishlist";
