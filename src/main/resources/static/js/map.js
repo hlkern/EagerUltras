@@ -17,6 +17,10 @@ let allMarkers = [];
 let activeFilter = "all";
 let wishlistIds = new Set();
 
+function t(key, vars = {}) {
+    return window.HoopAroundI18n?.t?.(key, vars) ?? key;
+}
+
 function markerType(stadiumId, visitedSet, wishlistSet) {
     if (visitedSet.has(stadiumId)) return "visited";
     if (wishlistSet.has(stadiumId)) return "wishlist";
@@ -48,9 +52,9 @@ function makeMarker(stadium, type) {
 
     const teams = (stadium.teams || []).map((team) => team.name).filter(Boolean).join(", ") || "-";
     const badge = type === "visited"
-        ? '<span style="color:#ff7a18;font-weight:700;">Visited</span>'
+        ? `<span style="color:#ff7a18;font-weight:700;">${t("map_legend_visited")}</span>`
         : type === "wishlist"
-            ? '<span style="color:#7ab8ff;font-weight:700;">Wishlist</span>'
+            ? `<span style="color:#7ab8ff;font-weight:700;">${t("map_filter_wishlist")}</span>`
             : "";
 
     marker.bindPopup(`
@@ -58,10 +62,10 @@ function makeMarker(stadium, type) {
             <strong style="font-size:14px;cursor:pointer;text-decoration:underline;color:#fff;"
                     onclick="openStadiumModal(${stadium.id})">${stadium.name || "Stadium"}</strong><br/>
             <span style="color:#888;">${stadium.city || ""} ${stadium.country?.name ? "| " + stadium.country.name : ""}</span><br/>
-            <span style="color:#888;">Capacity: ${stadium.capacity ?? "-"}</span><br/>
+            <span style="color:#888;">${t("map_capacity")}: ${stadium.capacity ?? "-"}</span><br/>
             <span style="color:#888;">${teams}</span><br/>
             ${badge ? "<br/>" + badge : ""}
-            <br/><span style="font-size:11px;color:#7ab8ff;cursor:pointer;" onclick="openStadiumModal(${stadium.id})">Open stadium page</span>
+            <br/><span style="font-size:11px;color:#7ab8ff;cursor:pointer;" onclick="openStadiumModal(${stadium.id})">${t("map_open_stadium")}</span>
         </div>
     `);
 
@@ -94,7 +98,7 @@ async function loadMap() {
     const userId = window.HoopAroundLayout?.user?.id;
     if (!userId) return;
 
-    if (mapInfo) mapInfo.textContent = "Loading map...";
+    if (mapInfo) mapInfo.textContent = t("map_loading_map");
 
     try {
         const [stadiumsResp, visitedResp, wishlistResp] = await Promise.all([
@@ -125,14 +129,18 @@ async function loadMap() {
         const totalCount = allMarkers.length;
 
         if (mapInfo) {
-            mapInfo.textContent = `${totalCount} stadiums on the map | ${visitedCount} visited | ${wishlistCount} in wishlist`;
+            mapInfo.textContent = t("map_stadium_count", {
+                total: totalCount,
+                visited: visitedCount,
+                wishlist: wishlistCount
+            });
         }
 
         allMarkers
             .filter((marker) => marker.type !== "other")
             .forEach((marker) => marker.marker.setZIndexOffset(1000));
     } catch (err) {
-        if (mapInfo) mapInfo.textContent = "Map could not be loaded.";
+        if (mapInfo) mapInfo.textContent = t("map_map_error");
     }
 }
 
@@ -147,7 +155,7 @@ if (window.HoopAroundLayout?.user) {
 function openStadiumModal(stadiumId) {
     const overlay = document.getElementById("stadiumModalOverlay");
     const content = document.getElementById("smContent");
-    content.innerHTML = '<p style="color:var(--muted,#888);text-align:center;padding:30px 0;">Loading...</p>';
+    content.innerHTML = `<p style="color:var(--muted,#888);text-align:center;padding:30px 0;">${t("map_loading")}</p>`;
     overlay.classList.add("open");
     document.body.style.overflow = "hidden";
     loadStadiumModalData(stadiumId);
@@ -171,7 +179,7 @@ async function loadStadiumModalData(stadiumId) {
         const insights = insightsResp.ok ? await insightsResp.json() : {};
 
         if (!stadium) {
-            content.innerHTML = '<p style="color:#f87;text-align:center;padding:20px 0;">Stadium not found.</p>';
+            content.innerHTML = `<p style="color:#f87;text-align:center;padding:20px 0;">${t("map_stadium_not_found")}</p>`;
             return;
         }
 
@@ -184,13 +192,13 @@ async function loadStadiumModalData(stadiumId) {
         const comments = Array.isArray(insights?.comments) ? insights.comments : [];
 
         const statusBadge = type === "visited"
-            ? '<span class="sm-status sm-status--visited">Visited</span>'
+            ? `<span class="sm-status sm-status--visited">${t("map_legend_visited")}</span>`
             : type === "wishlist"
-                ? '<span class="sm-status sm-status--wishlist">In my wishlist</span>'
+                ? `<span class="sm-status sm-status--wishlist">${t("map_legend_wishlist")}</span>`
                 : "";
 
         const commentsHtml = comments.length === 0
-            ? '<p style="color:var(--muted,#888);font-size:13px;">No comments yet.</p>'
+            ? `<p style="color:var(--muted,#888);font-size:13px;">${t("map_no_comments")}</p>`
             : comments.map((comment) => `
                 <div class="sm-comment-item">
                     <p class="sm-comment-text">${escHtml(comment.comment || "")}</p>
@@ -202,22 +210,22 @@ async function loadStadiumModalData(stadiumId) {
             <p class="sm-meta">${escHtml(stadium.city || "")}${stadium.country?.name ? " | " + escHtml(stadium.country.name) : ""}</p>
             ${statusBadge}
             <div class="sm-grid">
-                <div><span>Teams</span><strong>${escHtml(teams)}</strong></div>
-                <div><span>Capacity</span><strong>${stadium.capacity ?? "-"}</strong></div>
-                <div><span>Avg. rating</span><strong>${avg.toFixed(1)} (${rCount})</strong></div>
-                <div><span>Location</span><strong>${stadium.latitude != null ? stadium.latitude.toFixed(4) + ", " + stadium.longitude.toFixed(4) : "-"}</strong></div>
+                <div><span>${t("detail_teams")}</span><strong>${escHtml(teams)}</strong></div>
+                <div><span>${t("map_capacity")}</span><strong>${stadium.capacity ?? "-"}</strong></div>
+                <div><span>${t("map_avg_rating")}</span><strong>${avg.toFixed(1)} (${rCount})</strong></div>
+                <div><span>${t("detail_location")}</span><strong>${stadium.latitude != null ? stadium.latitude.toFixed(4) + ", " + stadium.longitude.toFixed(4) : "-"}</strong></div>
             </div>
             ${type !== "visited" ? `<div id="smWishlistRow"></div>` : ""}
-            <p class="sm-comments-title">Visitor comments</p>
+            <p class="sm-comments-title">${t("map_visitor_comments")}</p>
             ${commentsHtml}
-            <a class="sm-full-link" href="/stadium-detail.html?stadiumId=${stadium.id}">View full page</a>
+            <a class="sm-full-link" href="/stadium-detail.html?stadiumId=${stadium.id}">${t("map_view_full_page")}</a>
         `;
 
         if (type !== "visited") {
             renderWishlistBtn(stadiumId, type === "wishlist");
         }
     } catch (err) {
-        content.innerHTML = '<p style="color:#f87;text-align:center;padding:20px 0;">Data could not be loaded.</p>';
+        content.innerHTML = `<p style="color:#f87;text-align:center;padding:20px 0;">${t("map_data_error")}</p>`;
     }
 }
 
@@ -228,7 +236,7 @@ function renderWishlistBtn(stadiumId, inWishlist) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "sm-wishlist-btn" + (inWishlist ? " sm-wishlist-btn--active" : "");
-    btn.textContent = inWishlist ? "Remove from wishlist" : "Add to wishlist";
+    btn.textContent = inWishlist ? t("map_remove_wishlist") : t("map_add_wishlist");
 
     btn.addEventListener("click", async () => {
         const userId = window.HoopAroundLayout?.user?.id;
@@ -254,7 +262,7 @@ function renderWishlistBtn(stadiumId, inWishlist) {
                     marker.marker.setZIndexOffset(marker.type === "other" ? 0 : 1000);
                 }
 
-                btn.textContent = inWishlist ? "Remove from wishlist" : "Add to wishlist";
+                btn.textContent = inWishlist ? t("map_remove_wishlist") : t("map_add_wishlist");
                 btn.className = "sm-wishlist-btn" + (inWishlist ? " sm-wishlist-btn--active" : "");
             }
         } finally {
@@ -277,5 +285,11 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return String(value);
-    return dt.toLocaleString("en-US", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    return dt.toLocaleString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 }

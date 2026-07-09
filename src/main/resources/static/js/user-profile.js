@@ -13,6 +13,10 @@ const profileRatings = document.getElementById("profileRatings");
 const profileComments = document.getElementById("profileComments");
 const profileWishlist = document.getElementById("profileWishlist");
 
+function t(key, vars = {}) {
+    return window.HoopAroundI18n?.t?.(key, vars) ?? key;
+}
+
 function getCurrentUserId() {
     return window.HoopAroundLayout?.user?.id ?? null;
 }
@@ -31,7 +35,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleDateString("en-US", {
+    return dt.toLocaleDateString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -48,7 +52,7 @@ function createMatchCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Unknown stadium";
+    title.textContent = match.stadium?.name || "-";
 
     const teams = document.createElement("p");
     teams.className = "stadium-card-meta";
@@ -56,7 +60,7 @@ function createMatchCard(match) {
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Date: ${formatDate(match.matchAt)}`;
+    date.textContent = `${t("collection_add_match_date")}: ${formatDate(match.matchAt)}`;
 
     card.append(title, teams, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -68,15 +72,15 @@ function createRatingCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Unknown stadium";
+    title.textContent = match.stadium?.name || "-";
 
     const rating = document.createElement("p");
     rating.className = "stadium-card-meta";
-    rating.textContent = `Rating: ${match.stadiumRating}`;
+    rating.textContent = `${t("map_avg_rating")}: ${match.stadiumRating}`;
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Match date: ${formatDate(match.matchAt)}`;
+    date.textContent = `${t("collection_add_match_date")}: ${formatDate(match.matchAt)}`;
 
     card.append(title, rating, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -88,7 +92,7 @@ function createCommentCard(match) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = match.stadium?.name || "Unknown stadium";
+    title.textContent = match.stadium?.name || "-";
 
     const comment = document.createElement("p");
     comment.className = "stadium-card-meta";
@@ -96,7 +100,7 @@ function createCommentCard(match) {
 
     const date = document.createElement("p");
     date.className = "stadium-card-meta";
-    date.textContent = `Match date: ${formatDate(match.matchAt)}`;
+    date.textContent = `${t("collection_add_match_date")}: ${formatDate(match.matchAt)}`;
 
     card.append(title, comment, date);
     card.addEventListener("click", () => goStadium(match.stadium));
@@ -108,11 +112,11 @@ function createWishlistCard(stadium) {
     card.className = "stadium-card-item card-link";
 
     const title = document.createElement("h4");
-    title.textContent = stadium.name || "Unknown stadium";
+    title.textContent = stadium.name || "-";
 
     const meta = document.createElement("p");
     meta.className = "stadium-card-meta";
-    meta.textContent = `${stadium.country?.name || "Unknown country"} | ${stadium.city || "Unknown city"}`;
+    meta.textContent = `${stadium.country?.name || "-"} | ${stadium.city || "-"}`;
 
     card.append(title, meta);
     card.addEventListener("click", () => goStadium(stadium));
@@ -217,7 +221,7 @@ function renderChatAction(data) {
 }
 
 function renderProfile(data) {
-    profileTitle.textContent = `${data.username} profile`;
+    profileTitle.textContent = `${data.username} ${t("nav_profile").toLocaleLowerCase(window.HoopAroundI18n?.getLocale?.() || "en-US")}`;
     profileUsername.textContent = `@${data.username}`;
 
     renderFollowSummary(data);
@@ -229,10 +233,10 @@ function renderProfile(data) {
     const ratedMatches = matches.filter((match) => match.stadiumRating != null);
     const commentedMatches = matches.filter((match) => !!String(match.comment || "").trim());
 
-    renderList(profileMatches, matches, createMatchCard, "This user has no match records yet.");
-    renderList(profileRatings, ratedMatches, createRatingCard, "This user has not rated any matches yet.");
-    renderList(profileComments, commentedMatches, createCommentCard, "This user has not written any comments yet.");
-    renderList(profileWishlist, data.wishlist, createWishlistCard, "Wishlist is empty.");
+    renderList(profileMatches, matches, createMatchCard, getCurrentLanguage() === "tr" ? "Bu kullanıcının henüz maç kaydı yok." : "This user has no match records yet.");
+    renderList(profileRatings, ratedMatches, createRatingCard, getCurrentLanguage() === "tr" ? "Bu kullanıcı henüz maç puanlamadı." : "This user has not rated any matches yet.");
+    renderList(profileComments, commentedMatches, createCommentCard, getCurrentLanguage() === "tr" ? "Bu kullanıcı henüz yorum yazmadı." : "This user has not written any comments yet.");
+    renderList(profileWishlist, data.wishlist, createWishlistCard, getCurrentLanguage() === "tr" ? "Wishlist boş." : "Wishlist is empty.");
 
     profileMain.classList.remove("hidden");
     profileError.classList.add("hidden");
@@ -263,3 +267,7 @@ async function loadProfile() {
 }
 
 loadProfile();
+
+function getCurrentLanguage() {
+    return window.HoopAroundI18n?.getLanguage?.() || "en";
+}

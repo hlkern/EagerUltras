@@ -31,7 +31,7 @@
     <header class="topbar">
         <div class="topbar-left">
             <button id="menuToggle" class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-            <div><p class="tiny">EagerUltras</p><h1>Chat</h1></div>
+            <div><p class="tiny">EagerUltras</p><h1 data-i18n="chat_title">Chat</h1></div>
         </div>
         <div class="topbar-actions">
             <div class="language-switch">
@@ -43,31 +43,31 @@
     </header>
 
     <section class="card">
-        <h3>Start a new chat</h3>
+        <h3 data-i18n="chat_new_title">Start a new chat</h3>
         <div class="chat-new-row">
             <div class="search-wrap">
-                <input id="chatUserSearchInput" class="search-input" type="text" placeholder="Search username" autocomplete="off" />
+                <input id="chatUserSearchInput" class="search-input" type="text" placeholder="Search username" data-i18n-placeholder="chat_search_placeholder" autocomplete="off" />
                 <div id="chatUserSearchResults" class="search-results hidden"></div>
             </div>
-            <button id="chatStartBtn" class="ghost" type="button">Open chat</button>
+            <button id="chatStartBtn" class="ghost" type="button" data-i18n="chat_open">Open chat</button>
         </div>
         <p id="chatInfo" class="stadium-card-meta"></p>
     </section>
 
     <section class="chat-layout">
         <article class="card">
-            <h3>Previous chats</h3>
+            <h3 data-i18n="chat_previous">Previous chats</h3>
             <div id="chatSummaryList" class="chat-summary-list"></div>
         </article>
 
         <article class="card">
             <div class="chat-thread-head">
-                <h3 id="chatThreadTitle">Select a chat</h3>
+                <h3 id="chatThreadTitle" data-i18n="chat_select">Select a chat</h3>
             </div>
             <div id="chatMessages" class="chat-messages"></div>
             <form id="chatSendForm" class="chat-send-form">
-                <textarea id="chatMessageInput" rows="3" placeholder="Write a message..." required></textarea>
-                <button id="chatSendBtn" class="ghost" type="submit">Send</button>
+                <textarea id="chatMessageInput" rows="3" placeholder="Write a message..." data-i18n-placeholder="chat_message_placeholder" required></textarea>
+                <button id="chatSendBtn" class="ghost" type="submit" data-i18n="main_send">Send</button>
             </form>
         </article>
     </section>

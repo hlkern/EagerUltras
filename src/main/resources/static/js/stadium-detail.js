@@ -9,6 +9,10 @@ const stadiumLocation = document.getElementById("stadiumLocation");
 const stadiumRating = document.getElementById("stadiumRating");
 const stadiumComments = document.getElementById("stadiumComments");
 
+function t(key, vars = {}) {
+    return window.HoopAroundI18n?.t?.(key, vars) ?? key;
+}
+
 function getCurrentUserId() {
     return window.HoopAroundLayout?.user?.id ?? null;
 }
@@ -17,7 +21,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleDateString("en-US", {
+    return dt.toLocaleDateString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -121,9 +125,9 @@ function renderCommentItem(comment) {
 }
 
 function renderStadium(stadium, insights) {
-    stadiumPageTitle.textContent = stadium.name || "Stadium detail";
+    stadiumPageTitle.textContent = stadium.name || t("stadium_detail_title");
     stadiumName.textContent = stadium.name || "-";
-    stadiumCountryCity.textContent = `${stadium.country?.name || "Unknown country"} | ${stadium.city || "Unknown city"}`;
+    stadiumCountryCity.textContent = `${stadium.country?.name || "-"} | ${stadium.city || "-"}`;
     stadiumTeams.textContent = renderTeams(stadium);
     stadiumCapacity.textContent = stadium.capacity ?? "-";
 
@@ -133,12 +137,12 @@ function renderStadium(stadium, insights) {
 
     const avg = Number(insights?.averageRating || 0);
     const count = insights?.ratingCount || 0;
-    stadiumRating.textContent = `Ortalama puan: ${avg.toFixed(1)} (${count} puan)`;
+    stadiumRating.textContent = t("stadium_detail_avg_rating", { value: avg.toFixed(1), count });
 
     stadiumComments.innerHTML = "";
     const comments = Array.isArray(insights?.comments) ? insights.comments : [];
     if (comments.length === 0) {
-        stadiumComments.innerHTML = '<div class="empty">No comments yet.</div>';
+        stadiumComments.innerHTML = `<div class="empty">${t("map_no_comments")}</div>`;
     } else {
         comments.forEach((comment) => stadiumComments.appendChild(renderCommentItem(comment)));
     }

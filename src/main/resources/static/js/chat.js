@@ -16,6 +16,10 @@ const state = {
     searchDebounceId: null
 };
 
+function t(key, vars = {}) {
+    return window.HoopAroundI18n?.t?.(key, vars) ?? key;
+}
+
 function getCurrentUser() {
     return window.HoopAroundLayout?.user ?? null;
 }
@@ -24,7 +28,7 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -44,7 +48,7 @@ function renderSummaryList() {
 
     chatSummaryList.innerHTML = "";
     if (!Array.isArray(state.summaries) || state.summaries.length === 0) {
-        chatSummaryList.innerHTML = '<div class="empty">No chats yet.</div>';
+        chatSummaryList.innerHTML = `<div class="empty">${t("chat_no_chats")}</div>`;
         return;
     }
 
@@ -58,7 +62,7 @@ function renderSummaryList() {
 
         const message = document.createElement("p");
         message.className = "stadium-card-meta";
-        message.textContent = item.lastMessage || "No messages";
+        message.textContent = item.lastMessage || "-";
 
         const date = document.createElement("span");
         date.className = "stadium-card-meta";
@@ -75,7 +79,7 @@ function renderMessages(messages) {
 
     chatMessages.innerHTML = "";
     if (!Array.isArray(messages) || messages.length === 0) {
-        chatMessages.innerHTML = '<div class="empty">No messages in this chat yet.</div>';
+        chatMessages.innerHTML = `<div class="empty">${t("chat_no_messages")}</div>`;
         return;
     }
 
@@ -114,7 +118,7 @@ function renderSearchResults(items) {
     state.searchUsers = items;
 
     if (!Array.isArray(items) || items.length === 0) {
-        chatUserSearchResults.innerHTML = '<div class="empty">User not found.</div>';
+        chatUserSearchResults.innerHTML = `<div class="empty">${t("chat_user_not_found")}</div>`;
         chatUserSearchResults.classList.remove("hidden");
         return;
     }

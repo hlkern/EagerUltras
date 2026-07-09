@@ -4,7 +4,7 @@ function formatNotificationDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
