@@ -86,7 +86,8 @@ function initWelcome(user) {
     const welcomeTitle = document.getElementById("welcomeTitle");
     if (!welcomeTitle || !user) return;
     const preferredName = user.username || user.email || "Groundhooper";
-    welcomeTitle.textContent = `Welcome, ${preferredName}`;
+    const translated = window.HoopAroundI18n?.t?.("welcome_user", { name: preferredName });
+    welcomeTitle.textContent = translated || `Welcome, ${preferredName}`;
 }
 
 function initProfileLink(user) {

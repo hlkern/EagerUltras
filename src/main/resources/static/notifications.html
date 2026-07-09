@@ -18,15 +18,15 @@
         <p>EagerUltras</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
-        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile">My Profile</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
-        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
-        <a href="/map.html" class="sidebar-link" data-nav="map">Map</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home" data-i18n="nav_home">Home</a>
+        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile" data-i18n="nav_profile">My Profile</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries" data-i18n="nav_countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums" data-i18n="nav_stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams" data-i18n="nav_teams">Teams</a>
+        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist" data-i18n="nav_wishlist">Wishlist</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection" data-i18n="nav_collection">My Collection</a>
+        <a href="/map.html" class="sidebar-link" data-nav="map" data-i18n="nav_map">Map</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat" data-i18n="nav_chat">Chat</a>
     </nav>
 </aside>
 
@@ -43,7 +43,13 @@
                 <h1>Notifications</h1>
             </div>
         </div>
-        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+        <div class="topbar-actions">
+            <div class="language-switch">
+                <button type="button" data-language-button="en" data-i18n="action_en">EN</button>
+                <button type="button" data-language-button="tr" data-i18n="action_tr">TR</button>
+            </div>
+            <button id="logoutBtn" class="ghost" type="button" data-i18n="action_logout">Logout</button>
+        </div>
     </header>
 
     <section class="card">
@@ -55,6 +61,7 @@
     </section>
 </main>
 
+<script src="/js/i18n.js"></script>
 <script src="/js/layout.js"></script>
 <script src="/js/notifications.js"></script>
 </body>

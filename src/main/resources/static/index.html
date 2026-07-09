@@ -9,65 +9,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/auth.css" />
 </head>
-<body>
+<body data-page="auth">
 <div class="bg-glow"></div>
 <main class="auth-shell">
     <section class="brand-panel">
         <p class="tag">EagerUltras</p>
         <h1>HoopAround</h1>
-        <p class="subtitle">Track every stadium you visit, build your fan journey, and share your route with the community.</p>
+        <p class="subtitle" data-i18n="auth_subtitle">Track every stadium you visit, build your fan journey, and share your route with the community.</p>
         <div class="badge-row">
-            <span class="badge">Stadium Tracker</span>
-            <span class="badge">Fan Journey</span>
-            <span class="badge">Community</span>
+            <span class="badge" data-i18n="auth_badge_1">Stadium Tracker</span>
+            <span class="badge" data-i18n="auth_badge_2">Fan Journey</span>
+            <span class="badge" data-i18n="auth_badge_3">Community</span>
         </div>
     </section>
 
     <section class="card-panel">
+        <div class="auth-topbar">
+            <div class="language-switch">
+                <button type="button" data-language-button="en" data-i18n="action_en">EN</button>
+                <button type="button" data-language-button="tr" data-i18n="action_tr">TR</button>
+            </div>
+        </div>
         <div class="tabs" role="tablist" aria-label="Auth tabs">
-            <button id="loginTab" class="tab active" type="button" role="tab" aria-controls="loginForm">Login</button>
-            <button id="registerTab" class="tab" type="button" role="tab" aria-controls="registerForm">Register</button>
+            <button id="loginTab" class="tab active" type="button" role="tab" aria-controls="loginForm" data-i18n="auth_login">Login</button>
+            <button id="registerTab" class="tab" type="button" role="tab" aria-controls="registerForm" data-i18n="auth_register">Register</button>
         </div>
 
         <div id="alertBox" class="alert hidden" aria-live="polite"></div>
 
         <form id="loginForm" class="form active" autocomplete="on">
-            <h2>Welcome back</h2>
+            <h2 data-i18n="auth_welcome_back">Welcome back</h2>
             <label>
-                Email
+                <span data-i18n="auth_email">Email</span>
                 <input id="loginEmail" type="email" placeholder="you@example.com" required />
             </label>
 
             <label>
-                Password
-                <input id="loginPassword" type="password" placeholder="Enter password" required />
+                <span data-i18n="auth_password">Password</span>
+                <input id="loginPassword" type="password" data-i18n-placeholder="auth_password_placeholder" placeholder="Enter password" required />
             </label>
 
-            <button id="loginBtn" class="primary" type="submit">Sign in</button>
+            <button id="loginBtn" class="primary" type="submit" data-i18n="auth_sign_in">Sign in</button>
         </form>
 
         <form id="registerForm" class="form" autocomplete="on">
-            <h2>Create account</h2>
+            <h2 data-i18n="auth_create_account">Create account</h2>
             <label>
-                Username
+                <span data-i18n="auth_username">Username</span>
                 <input id="registerUsername" type="text" placeholder="groundhopper01" required minlength="3" />
             </label>
 
             <label>
-                Email
+                <span data-i18n="auth_email">Email</span>
                 <input id="registerEmail" type="email" placeholder="you@example.com" required />
             </label>
 
             <label>
-                Password
-                <input id="registerPassword" type="password" placeholder="At least 6 chars" required minlength="6" />
+                <span data-i18n="auth_password">Password</span>
+                <input id="registerPassword" type="password" data-i18n-placeholder="auth_password_min_placeholder" placeholder="At least 6 chars" required minlength="6" />
             </label>
 
-            <button id="registerBtn" class="primary" type="submit">Create account</button>
+            <button id="registerBtn" class="primary" type="submit" data-i18n="auth_create_button">Create account</button>
         </form>
     </section>
 </main>
 
+<script src="js/i18n.js"></script>
 <script src="js/auth.js"></script>
 </body>
 </html>

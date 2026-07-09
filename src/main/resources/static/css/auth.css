@@ -98,6 +98,35 @@ h1 {
     padding: 24px;
 }
 
+.auth-topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+}
+
+.language-switch {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.language-switch button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px 12px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.language-switch button.active {
+    color: var(--text);
+    background: rgba(255, 122, 24, 0.18);
+}
+
 .tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;

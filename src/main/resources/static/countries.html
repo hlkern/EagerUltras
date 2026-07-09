@@ -18,14 +18,14 @@
         <p>EagerUltras</p>
     </div>
     <nav class="sidebar-nav">
-        <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
-        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile">My Profile</a>
-        <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
-        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
-        <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
-        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist">Wishlist</a>
-        <a href="/collection.html" class="sidebar-link" data-nav="collection">My Collection</a>
-        <a href="/chat.html" class="sidebar-link" data-nav="chat">Chat</a>
+        <a href="/main.html" class="sidebar-link" data-nav="home" data-i18n="nav_home">Home</a>
+        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile" data-i18n="nav_profile">My Profile</a>
+        <a href="/countries.html" class="sidebar-link" data-nav="countries" data-i18n="nav_countries">Countries</a>
+        <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums" data-i18n="nav_stadiums">Stadiums</a>
+        <a href="/teams.html" class="sidebar-link" data-nav="teams" data-i18n="nav_teams">Teams</a>
+        <a href="/wishlist.html" class="sidebar-link" data-nav="wishlist" data-i18n="nav_wishlist">Wishlist</a>
+        <a href="/collection.html" class="sidebar-link" data-nav="collection" data-i18n="nav_collection">My Collection</a>
+        <a href="/chat.html" class="sidebar-link" data-nav="chat" data-i18n="nav_chat">Chat</a>
     </nav>
 </aside>
 
@@ -39,39 +39,46 @@
             </button>
             <div>
                 <p class="tiny">EagerUltras</p>
-                <h1>Countries</h1>
+                <h1 data-i18n="countries_title">Countries</h1>
             </div>
         </div>
-        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+        <div class="topbar-actions">
+            <div class="language-switch">
+                <button type="button" data-language-button="en" data-i18n="action_en">EN</button>
+                <button type="button" data-language-button="tr" data-i18n="action_tr">TR</button>
+            </div>
+            <button id="logoutBtn" class="ghost" type="button" data-i18n="action_logout">Logout</button>
+        </div>
     </header>
 
     <section class="country-card">
         <div class="section-head">
-            <h3>Countries / Leagues</h3>
-            <p>Select a country to see stadiums.</p>
+            <h3 data-i18n="countries_heading">Countries / Leagues</h3>
+            <p data-i18n="countries_desc">Select a country to see stadiums.</p>
         </div>
         <div class="search-wrap" style="margin-bottom:16px;">
-            <label for="countrySearchInput" class="tiny">Search</label>
-            <input id="countrySearchInput" class="search-input" type="text" placeholder="Search countries or stadiums" autocomplete="off" />
+            <label for="countrySearchInput" class="tiny" data-i18n="search_label">Search</label>
+            <input id="countrySearchInput" class="search-input" type="text" data-i18n-placeholder="countries_search_placeholder" placeholder="Search countries or stadiums" autocomplete="off" />
         </div>
         <div id="countryList" class="country-list" aria-live="polite"></div>
     </section>
 
     <section id="stadiumDetail" class="detail-card hidden" aria-live="polite">
-        <h3>Stadium details</h3>
+        <h3 data-i18n="countries_stadium_details">Stadium details</h3>
         <div class="detail-grid">
-            <div><span>ID</span><strong id="detailId">-</strong></div>
-            <div><span>Name</span><strong id="detailName">-</strong></div>
-            <div><span>Teams</span><strong id="detailTeam">-</strong></div>
-            <div><span>City</span><strong id="detailCity">-</strong></div>
-            <div><span>Capacity</span><strong id="detailCapacity">-</strong></div>
-            <div><span>Country</span><strong id="detailCountry">-</strong></div>
-            <div><span>Latitude</span><strong id="detailLatitude">-</strong></div>
-            <div><span>Longitude</span><strong id="detailLongitude">-</strong></div>
+            <div><span data-i18n="detail_id">ID</span><strong id="detailId">-</strong></div>
+            <div><span data-i18n="detail_name">Name</span><strong id="detailName">-</strong></div>
+            <div><span data-i18n="detail_teams">Teams</span><strong id="detailTeam">-</strong></div>
+            <div><span data-i18n="detail_city">City</span><strong id="detailCity">-</strong></div>
+            <div><span data-i18n="detail_capacity">Capacity</span><strong id="detailCapacity">-</strong></div>
+            <div><span data-i18n="detail_country">Country</span><strong id="detailCountry">-</strong></div>
+            <div><span data-i18n="detail_latitude">Latitude</span><strong id="detailLatitude">-</strong></div>
+            <div><span data-i18n="detail_longitude">Longitude</span><strong id="detailLongitude">-</strong></div>
         </div>
     </section>
 </main>
 
+<script src="/js/i18n.js"></script>
 <script src="/js/layout.js"></script>
 <script src="/js/countries.js"></script>
 </body>
