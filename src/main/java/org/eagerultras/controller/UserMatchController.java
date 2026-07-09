@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.eagerultras.request.CreateUserMatchRequest;
 import org.eagerultras.request.SetUserMatchReactionRequest;
 import org.eagerultras.request.UpdateUserMatchRequest;
+import org.eagerultras.response.FollowedMatchFeedResponse;
 import org.eagerultras.response.UserMatchResponse;
 import org.eagerultras.service.UserMatchService;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,11 @@ public class UserMatchController {
     @GetMapping
     public List<UserMatchResponse> getByUserId(@PathVariable Long userId) {
         return userMatchService.getByUserId(userId);
+    }
+
+    @GetMapping("/feed")
+    public List<FollowedMatchFeedResponse> getFeedForFollower(@PathVariable Long userId) {
+        return userMatchService.getFeedForFollower(userId);
     }
 
     @PutMapping("/{matchId}")

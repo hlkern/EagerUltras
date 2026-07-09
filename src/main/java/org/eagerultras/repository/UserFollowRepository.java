@@ -4,6 +4,7 @@ import org.eagerultras.entity.UserFollow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,5 +17,11 @@ public interface UserFollowRepository extends JpaRepository<UserFollow, Long> {
     long countByFollowerId(Long followerId);
 
     long countByFollowingId(Long followingId);
+
+    List<UserFollow> findTop20ByFollowingIdOrderByCreatedAtDesc(Long followingId);
+
+    List<UserFollow> findAllByFollowingIdAndFollowerIdNotOrderByCreatedAtDesc(Long followingId, Long followerId);
+
+    List<UserFollow> findAllByFollowerId(Long followerId);
 }
 

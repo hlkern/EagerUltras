@@ -22,4 +22,7 @@ public interface UserMatchRepository extends JpaRepository<UserMatch, Long> {
 
     @EntityGraph(attributePaths = {"user"})
     List<UserMatch> findAllByStadiumIdOrderByMatchAtDesc(Long stadiumId);
+
+    @EntityGraph(attributePaths = {"user", "stadium", "stadium.country", "homeTeam", "awayTeam"})
+    List<UserMatch> findAllByUserIdInOrderByCreatedAtDesc(List<Long> userIds);
 }

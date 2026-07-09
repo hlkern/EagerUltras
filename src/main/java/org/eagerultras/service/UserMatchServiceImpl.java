@@ -6,16 +6,19 @@ import org.eagerultras.entity.ReactionType;
 import org.eagerultras.entity.Stadium;
 import org.eagerultras.entity.Team;
 import org.eagerultras.entity.User;
+import org.eagerultras.entity.UserFollow;
 import org.eagerultras.entity.UserMatch;
 import org.eagerultras.entity.UserMatchCommentReaction;
 import org.eagerultras.mapper.StadiumMapper;
 import org.eagerultras.repository.StadiumRepository;
 import org.eagerultras.repository.TeamRepository;
+import org.eagerultras.repository.UserFollowRepository;
 import org.eagerultras.repository.UserMatchCommentReactionRepository;
 import org.eagerultras.repository.UserMatchRepository;
 import org.eagerultras.repository.UserRepository;
 import org.eagerultras.request.CreateUserMatchRequest;
 import org.eagerultras.request.UpdateUserMatchRequest;
+import org.eagerultras.response.FollowedMatchFeedResponse;
 import org.eagerultras.response.StadiumResponse;
 import org.eagerultras.response.TeamResponse;
 import org.eagerultras.response.UserMatchResponse;
@@ -35,6 +38,7 @@ public class UserMatchServiceImpl implements UserMatchService {
     private final UserRepository userRepository;
     private final StadiumRepository stadiumRepository;
     private final TeamRepository teamRepository;
+    private final UserFollowRepository userFollowRepository;
     private final UserMatchRepository userMatchRepository;
     private final UserMatchCommentReactionRepository userMatchCommentReactionRepository;
     private final StadiumMapper stadiumMapper;
@@ -84,6 +88,23 @@ public class UserMatchServiceImpl implements UserMatchService {
         return userMatchRepository.findAllByUserIdOrderByMatchAtDesc(userId)
                 .stream()
                 .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<FollowedMatchFeedResponse> getFeedForFollower(Long userId) {
+        List<Long> followingIds = userFollowRepository.findAllByFollowerId(userId).stream()
+                .map(UserFollow::getFollowing)
+                .map(User::getId)
+                .distinct()
+                .toList();
+
+        if (followingIds.isEmpty()) {
+            return List.of();
+        }
+
+        return userMatchRepository.findAllByUserIdInOrderByCreatedAtDesc(followingIds).stream()
+                .map(this::toFeedResponse)
                 .toList();
     }
 
@@ -154,6 +175,21 @@ public class UserMatchServiceImpl implements UserMatchService {
     private UserMatchResponse toResponse(UserMatch userMatch) {
         UserMatchResponse response = new UserMatchResponse();
         response.setId(userMatch.getId());
+        response.setStadium(toStadiumResponse(userMatch.getStadium()));
+        response.setHomeTeam(toTeamResponse(userMatch.getHomeTeam()));
+        response.setAwayTeam(toTeamResponse(userMatch.getAwayTeam()));
+        response.setMatchAt(userMatch.getMatchAt());
+        response.setStadiumRating(userMatch.getStadiumRating());
+        response.setComment(userMatch.getComment());
+        response.setCreatedAt(userMatch.getCreatedAt());
+        return response;
+    }
+
+    private FollowedMatchFeedResponse toFeedResponse(UserMatch userMatch) {
+        FollowedMatchFeedResponse response = new FollowedMatchFeedResponse();
+        response.setId(userMatch.getId());
+        response.setUserId(userMatch.getUser().getId());
+        response.setUsername(userMatch.getUser().getUsername());
         response.setStadium(toStadiumResponse(userMatch.getStadium()));
         response.setHomeTeam(toTeamResponse(userMatch.getHomeTeam()));
         response.setAwayTeam(toTeamResponse(userMatch.getAwayTeam()));

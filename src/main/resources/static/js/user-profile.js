@@ -4,6 +4,7 @@ const profileTitle = document.getElementById("profileTitle");
 const profileUsername = document.getElementById("profileUsername");
 const profileFollowerCount = document.getElementById("profileFollowerCount");
 const profileFollowingCount = document.getElementById("profileFollowingCount");
+const profileRelationshipInfo = document.getElementById("profileRelationshipInfo");
 const followActionBtn = document.getElementById("followActionBtn");
 const followActionInfo = document.getElementById("followActionInfo");
 const profileChatBtn = document.getElementById("profileChatBtn");
@@ -30,12 +31,10 @@ function formatDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleDateString("en-US", {
         day: "2-digit",
         month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        year: "numeric"
     });
 }
 
@@ -141,6 +140,19 @@ function renderFollowSummary(data) {
     }
 }
 
+function renderRelationshipInfo(data) {
+    if (!profileRelationshipInfo) return;
+
+    if (data?.followsViewer) {
+        profileRelationshipInfo.textContent = "Follows you";
+        profileRelationshipInfo.classList.remove("hidden");
+        return;
+    }
+
+    profileRelationshipInfo.textContent = "";
+    profileRelationshipInfo.classList.add("hidden");
+}
+
 async function toggleFollow(data) {
     const viewerUserId = getCurrentUserId();
     if (!viewerUserId || !data?.id) return;
@@ -205,10 +217,11 @@ function renderChatAction(data) {
 }
 
 function renderProfile(data) {
-    profileTitle.textContent = `${data.username} profili`;
+    profileTitle.textContent = `${data.username} profile`;
     profileUsername.textContent = `@${data.username}`;
 
     renderFollowSummary(data);
+    renderRelationshipInfo(data);
     renderFollowActions(data);
     renderChatAction(data);
 
@@ -216,9 +229,9 @@ function renderProfile(data) {
     const ratedMatches = matches.filter((match) => match.stadiumRating != null);
     const commentedMatches = matches.filter((match) => !!String(match.comment || "").trim());
 
-    renderList(profileMatches, matches, createMatchCard, "Bu kullanicinin mac kaydi yok.");
-    renderList(profileRatings, ratedMatches, createRatingCard, "Bu kullanici henuz puan vermemis.");
-    renderList(profileComments, commentedMatches, createCommentCard, "Bu kullanici henuz yorum yazmamis.");
+    renderList(profileMatches, matches, createMatchCard, "This user has no match records yet.");
+    renderList(profileRatings, ratedMatches, createRatingCard, "This user has not rated any matches yet.");
+    renderList(profileComments, commentedMatches, createCommentCard, "This user has not written any comments yet.");
     renderList(profileWishlist, data.wishlist, createWishlistCard, "Wishlist is empty.");
 
     profileMain.classList.remove("hidden");

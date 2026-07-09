@@ -1,5 +1,6 @@
 const stadiumsList = document.getElementById("stadiumsList");
 const stadiumsInfo = document.getElementById("stadiumsInfo");
+const stadiumSearchInput = document.getElementById("stadiumSearchInput");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const visitedStadiumIds = new Set();
 const wishlistStadiumIds = new Set();
@@ -18,9 +19,17 @@ function toSlug(value) {
 
 let allStadiums = [];
 let currentFilter = "all";
+let currentSearchQuery = "";
 
 function getCurrentUserId() {
     return window.HoopAroundLayout?.user?.id ?? null;
+}
+
+function normalizeSearch(value) {
+    return String(value || "")
+        .toLocaleLowerCase("en-US")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 function renderTeams(stadium) {
@@ -79,7 +88,7 @@ function updateInfoText(totalCount, renderedCount) {
         filterLabel = "Not Visited";
     }
 
-    stadiumsInfo.textContent = `${totalCount} stadyum, ${visitedCount} tanesi koleksiyonunda. Gosterilen: ${renderedCount} (${filterLabel}).`;
+    stadiumsInfo.textContent = `${totalCount} stadiums, ${visitedCount} visited. Showing: ${renderedCount} (${filterLabel}).`;
 }
 
 function applyFilter(stadiums) {
@@ -92,10 +101,26 @@ function applyFilter(stadiums) {
     return stadiums;
 }
 
+function applySearch(stadiums) {
+    const normalizedQuery = normalizeSearch(currentSearchQuery);
+    if (!normalizedQuery) return stadiums;
+
+    return stadiums.filter((stadium) => {
+        const haystack = [
+            stadium.name,
+            stadium.city,
+            stadium.country?.name,
+            ...(stadium.teams || []).map((team) => team?.name)
+        ].map(normalizeSearch).join(" ");
+
+        return haystack.includes(normalizedQuery);
+    });
+}
+
 function refreshStadiumList() {
     if (!stadiumsList) return;
 
-    const filtered = applyFilter(allStadiums);
+    const filtered = applySearch(applyFilter(allStadiums));
     stadiumsList.innerHTML = "";
 
     if (filtered.length === 0) {
@@ -161,7 +186,7 @@ function createWishlistButton(stadiumId) {
             if (response.status === 409) {
                 wishlistStadiumIds.add(stadiumId);
                 syncButtonState();
-                if (stadiumsInfo) stadiumsInfo.textContent = payload?.message || "Bu stadyum wishlist'te zaten var.";
+                if (stadiumsInfo) stadiumsInfo.textContent = payload?.message || "This stadium is already in your wishlist.";
                 return;
             }
 
@@ -309,7 +334,7 @@ function createInsightsSection(stadiumId) {
 
     const rating = document.createElement("p");
     rating.className = "stadium-card-meta";
-    rating.textContent = "Ortalama puan: -";
+    rating.textContent = "Average rating: -";
 
     const title = document.createElement("h5");
     title.textContent = "Comments";
@@ -334,7 +359,7 @@ function createInsightsSection(stadiumId) {
 
         const avg = Number(insights.averageRating || 0);
         const count = insights.ratingCount || 0;
-        rating.textContent = `Ortalama puan: ${avg.toFixed(1)} (${count} puan)`;
+        rating.textContent = `Average rating: ${avg.toFixed(1)} (${count} ratings)`;
 
         const list = Array.isArray(insights.comments) ? insights.comments : [];
         comments.innerHTML = "";
@@ -376,7 +401,7 @@ function createStadiumCard(stadium) {
     const isVisited = visitedStadiumIds.has(stadium.id);
     const badge = document.createElement("span");
     badge.className = `stadium-badge ${isVisited ? "stadium-badge--visited" : "stadium-badge--not-visited"}`;
-    badge.textContent = isVisited ? "Gidildi" : "Gidilmedi";
+    badge.textContent = isVisited ? "Visited" : "Not Visited";
     titleRow.appendChild(badge);
 
     const line1 = document.createElement("p");
@@ -448,6 +473,13 @@ async function loadStadiums() {
 if (filterButtons.length > 0) {
     filterButtons.forEach((btn) => {
         btn.addEventListener("click", () => setFilter(btn.dataset.filter || "all"));
+    });
+}
+
+if (stadiumSearchInput) {
+    stadiumSearchInput.addEventListener("input", () => {
+        currentSearchQuery = stadiumSearchInput.value || "";
+        refreshStadiumList();
     });
 }
 

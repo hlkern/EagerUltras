@@ -3,6 +3,8 @@ package org.eagerultras.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -20,6 +22,9 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "notifications_seen_at")
+    private LocalDateTime notificationsSeenAt;
 
   // @OneToMany(mappedBy = "user")
   //  private List<UserStadium> visitedStadiums;

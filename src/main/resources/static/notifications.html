@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HoopAround | User Profile</title>
+    <title>HoopAround | Notifications</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css" />
 </head>
-<body data-page="user-profile">
+<body data-page="notifications">
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
 <aside id="sidebar" class="sidebar" aria-hidden="true">
@@ -40,65 +40,22 @@
             </button>
             <div>
                 <p class="tiny">EagerUltras</p>
-                <h1 id="profileTitle">User profile</h1>
+                <h1>Notifications</h1>
             </div>
         </div>
         <button id="logoutBtn" class="ghost" type="button">Logout</button>
     </header>
 
-    <section id="profileMain" class="card hidden">
-        <div class="profile-top-row">
-            <div>
-                <h3 id="profileUsername">-</h3>
-                <p class="stadium-card-meta">Matches, ratings, comments, and wishlist</p>
-                <p id="profileRelationshipInfo" class="stadium-card-meta hidden"></p>
-            </div>
-            <div class="profile-actions">
-                <button id="profileChatBtn" class="ghost" type="button">Go to chat</button>
-                <button id="followActionBtn" class="ghost hidden" type="button"></button>
-                <p id="followActionInfo" class="stadium-card-meta hidden"></p>
-            </div>
+    <section class="card">
+        <div class="section-head">
+            <h3>All notifications</h3>
+            <p>Your follow, like, and comment history.</p>
         </div>
-        <div class="profile-stats">
-            <div class="profile-stat-box">
-                <span>Followers</span>
-                <strong id="profileFollowerCount">0</strong>
-            </div>
-            <div class="profile-stat-box">
-                <span>Following</span>
-                <strong id="profileFollowingCount">0</strong>
-            </div>
-        </div>
-    </section>
-
-    <section class="card">
-        <h3>Matches</h3>
-        <div id="profileMatches" class="cards-grid"></div>
-    </section>
-
-    <section class="card">
-        <h3>Ratings</h3>
-        <div id="profileRatings" class="cards-grid"></div>
-    </section>
-
-    <section class="card">
-        <h3>Comments</h3>
-        <div id="profileComments" class="cards-grid"></div>
-    </section>
-
-    <section class="card">
-        <h3>Wishlist</h3>
-        <div id="profileWishlist" class="cards-grid"></div>
-    </section>
-
-    <section id="profileError" class="card hidden">
-        <h3>User not found</h3>
-        <p>This profile could not be reached.</p>
+        <div id="notificationsPageList" class="chat-summary-list"></div>
     </section>
 </main>
 
 <script src="/js/layout.js"></script>
-<script src="/js/user-profile.js"></script>
+<script src="/js/notifications.js"></script>
 </body>
 </html>
-

@@ -104,6 +104,7 @@ body.menu-open .sidebar-overlay {
     background: var(--card);
 }
 
+
 .topbar-left {
     display: flex;
     align-items: center;

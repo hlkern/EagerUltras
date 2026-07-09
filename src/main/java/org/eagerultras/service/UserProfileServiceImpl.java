@@ -54,9 +54,13 @@ public class UserProfileServiceImpl implements UserProfileService {
         boolean followedByViewer = viewerUserId != null
                 && !ownProfile
                 && userFollowRepository.existsByFollowerIdAndFollowingId(viewerUserId, user.getId());
+        boolean followsViewer = viewerUserId != null
+                && !ownProfile
+                && userFollowRepository.existsByFollowerIdAndFollowingId(user.getId(), viewerUserId);
 
         response.setOwnProfile(ownProfile);
         response.setFollowedByViewer(followedByViewer);
+        response.setFollowsViewer(followsViewer);
         response.setMatches(matches);
         response.setWishlist(wishlist);
         return response;

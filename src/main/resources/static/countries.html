@@ -15,10 +15,11 @@
 <aside id="sidebar" class="sidebar" aria-hidden="true">
     <div class="sidebar-head">
         <h3>HoopAround</h3>
-        <p>Groundhoopers app</p>
+        <p>EagerUltras</p>
     </div>
     <nav class="sidebar-nav">
         <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile">My Profile</a>
         <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
         <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
         <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
@@ -37,7 +38,7 @@
                 <span></span>
             </button>
             <div>
-                <p class="tiny">GROUNDHOOPERS APP</p>
+                <p class="tiny">EagerUltras</p>
                 <h1>Countries</h1>
             </div>
         </div>
@@ -48,6 +49,10 @@
         <div class="section-head">
             <h3>Countries / Leagues</h3>
             <p>Select a country to see stadiums.</p>
+        </div>
+        <div class="search-wrap" style="margin-bottom:16px;">
+            <label for="countrySearchInput" class="tiny">Search</label>
+            <input id="countrySearchInput" class="search-input" type="text" placeholder="Search countries or stadiums" autocomplete="off" />
         </div>
         <div id="countryList" class="country-list" aria-live="polite"></div>
     </section>

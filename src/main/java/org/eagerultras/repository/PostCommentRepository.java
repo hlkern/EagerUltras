@@ -14,4 +14,7 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
     List<PostComment> findAllByPostIdOrderByCreatedAtAsc(Long postId);
 
     long countByPostId(Long postId);
+
+    @EntityGraph(attributePaths = {"author", "post", "post.author"})
+    List<PostComment> findAllByPostAuthorIdAndAuthorIdNotOrderByCreatedAtDesc(Long authorId, Long authorIdToExclude);
 }

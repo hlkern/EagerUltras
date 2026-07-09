@@ -21,10 +21,11 @@
 <aside id="sidebar" class="sidebar" aria-hidden="true">
     <div class="sidebar-head">
         <h3>HoopAround</h3>
-        <p>Groundhoopers app</p>
+        <p>EagerUltras</p>
     </div>
     <nav class="sidebar-nav">
         <a href="/main.html" class="sidebar-link" data-nav="home">Home</a>
+        <a href="/user-profile.html" class="sidebar-link" data-nav="my-profile">My Profile</a>
         <a href="/countries.html" class="sidebar-link" data-nav="countries">Countries</a>
         <a href="/stadiums.html" class="sidebar-link" data-nav="stadiums">Stadiums</a>
         <a href="/teams.html" class="sidebar-link" data-nav="teams">Teams</a>
@@ -43,7 +44,7 @@
                 <span></span><span></span><span></span>
             </button>
             <div>
-                <p class="tiny">GROUNDHOOPERS APP</p>
+                <p class="tiny">EagerUltras</p>
                 <h1>HoopAround</h1>
             </div>
         </div>
@@ -56,27 +57,24 @@
             <p>Choose the stadium, teams, date, rating, and comment.</p>
         </div>
         <form id="matchForm" class="match-form">
-            <label>
+            <label class="search-wrap">
                 Stadium
-                <select id="matchStadiumId" required>
-                    <option value="">Select stadium</option>
-                </select>
+                <input id="matchStadiumInput" class="search-input" type="text" placeholder="Type to find a stadium" autocomplete="off" required />
+                <div id="matchStadiumResults" class="search-results hidden"></div>
             </label>
-            <label>
+            <label class="search-wrap">
                 Home team
-                <select id="matchHomeTeamId" required>
-                    <option value="">Select team</option>
-                </select>
+                <input id="matchHomeTeamInput" class="search-input" type="text" placeholder="Type to choose the home team" autocomplete="off" required />
+                <div id="matchHomeTeamResults" class="search-results hidden"></div>
             </label>
-            <label>
+            <label class="search-wrap">
                 Away team
-                <select id="matchAwayTeamId" required>
-                    <option value="">Select team</option>
-                </select>
+                <input id="matchAwayTeamInput" class="search-input" type="text" placeholder="Type to choose the away team" autocomplete="off" required />
+                <div id="matchAwayTeamResults" class="search-results hidden"></div>
             </label>
             <label>
-                Match date and time
-                <input id="matchAt" type="datetime-local" required />
+                Match date
+                <input id="matchAt" type="date" required />
             </label>
             <label>
                 Stadium rating (1-10)

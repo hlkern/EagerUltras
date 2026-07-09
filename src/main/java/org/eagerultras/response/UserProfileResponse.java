@@ -13,6 +13,7 @@ public class UserProfileResponse {
     private Long followerCount;
     private Long followingCount;
     private boolean followedByViewer;
+    private boolean followsViewer;
     private boolean ownProfile;
     private List<MatchItem> matches;
     private List<StadiumResponse> wishlist;

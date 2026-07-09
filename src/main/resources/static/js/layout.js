@@ -67,7 +67,13 @@ function initSidebar() {
 }
 
 function initActiveMenu() {
-    const page = document.body.dataset.page;
+    let page = document.body.dataset.page;
+    if (page === "user-profile") {
+        const profileUsername = new URLSearchParams(window.location.search).get("username");
+        if (profileUsername && user?.username && profileUsername === user.username) {
+            page = "my-profile";
+        }
+    }
     if (!page) return;
 
     const currentLink = document.querySelector(`.sidebar-link[data-nav="${page}"]`);
@@ -83,6 +89,14 @@ function initWelcome(user) {
     welcomeTitle.textContent = `Welcome, ${preferredName}`;
 }
 
+function initProfileLink(user) {
+    if (!user?.username) return;
+    const profileLinks = document.querySelectorAll('.sidebar-link[data-nav="my-profile"]');
+    profileLinks.forEach((link) => {
+        link.setAttribute("href", `/kullanici/${encodeURIComponent(user.username)}`);
+    });
+}
+
 function initLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     if (!logoutBtn) return;
@@ -95,6 +109,7 @@ function initLogout() {
 
 const user = ensureSession();
 if (user) {
+    initProfileLink(user);
     initSidebar();
     initActiveMenu();
     initWelcome(user);

@@ -1,5 +1,7 @@
 const teamsList = document.getElementById("teamsList");
 const teamsInfo = document.getElementById("teamsInfo");
+const teamSearchInput = document.getElementById("teamSearchInput");
+let allTeams = [];
 
 function toSlug(value) {
     return String(value || "")
@@ -9,6 +11,13 @@ function toSlug(value) {
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
+}
+
+function normalizeSearch(value) {
+    return String(value || "")
+        .toLocaleLowerCase("en-US")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 function createTeamCard(team) {
@@ -32,6 +41,26 @@ function createTeamCard(team) {
     return card;
 }
 
+function renderTeams() {
+    if (!teamsList) return;
+
+    const query = normalizeSearch(teamSearchInput?.value || "");
+    const filteredTeams = !query
+        ? allTeams
+        : allTeams.filter((team) => normalizeSearch(team.name).includes(query));
+
+    teamsList.innerHTML = "";
+
+    if (filteredTeams.length === 0) {
+        teamsList.innerHTML = '<div class="empty">No teams matched your search.</div>';
+        if (teamsInfo) teamsInfo.textContent = "";
+        return;
+    }
+
+    filteredTeams.forEach((team) => teamsList.appendChild(createTeamCard(team)));
+    if (teamsInfo) teamsInfo.textContent = `${filteredTeams.length} teams listed.`;
+}
+
 async function loadTeams() {
     if (!teamsList) return;
 
@@ -53,14 +82,18 @@ async function loadTeams() {
             return;
         }
 
-        const teams = data.toSorted((a, b) => (a.name || "").localeCompare(b.name || ""));
-        teamsList.innerHTML = "";
-        teams.forEach((team) => teamsList.appendChild(createTeamCard(team)));
-        if (teamsInfo) teamsInfo.textContent = `${teams.length} takim listelendi.`;
+        allTeams = data.toSorted((a, b) => (a.name || "").localeCompare(b.name || ""));
+        renderTeams();
     } catch {
         teamsList.innerHTML = '<div class="error">Could not load teams.</div>';
         if (teamsInfo) teamsInfo.textContent = "";
     }
+}
+
+if (teamSearchInput) {
+    teamSearchInput.addEventListener("input", () => {
+        renderTeams();
+    });
 }
 
 loadTeams();

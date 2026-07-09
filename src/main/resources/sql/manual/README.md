@@ -30,16 +30,19 @@ psql -U postgres -d eager_ultras -f create_user_chat_tables.sql
 # 9. Okunmamış mesaj kolonu
 psql -U postgres -d eager_ultras -f add_message_read_at.sql
 
-# 10. Gönderi (post) tabloları
+# 10. Notification seen kolonu
+psql -U postgres -d eager_ultras -f add_notifications_seen_at.sql
+
+# 11. Gönderi (post) tabloları
 psql -U postgres -d eager_ultras -f create_posts.sql
 psql -U postgres -d eager_ultras -f create_post_interactions.sql
 
 # --- Opsiyonel: Stadyum verisi import ---
 
-# 11a. İngiltere/Fransa/Almanya/İskoçya/İspanya (jokecamp CSV)
+# 12a. İngiltere/Fransa/Almanya/İskoçya/İspanya (jokecamp CSV)
 psql -U postgres -d eager_ultras -f import_european_stadiums.sql
 
-# 11b. Geniş Avrupa verisi (İtalya, Hollanda, Portekiz, Belçika, Türkiye vb.)
+# 12b. Geniş Avrupa verisi (İtalya, Hollanda, Portekiz, Belçika, Türkiye vb.)
 psql -U postgres -d eager_ultras -f import_european_stadiums_extended.sql
 ```
 

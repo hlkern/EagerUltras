@@ -24,6 +24,11 @@ function goToSearchItem(item) {
     }
 }
 
+function goToUserProfile(username) {
+    if (!username) return;
+    window.location.href = `/kullanici/${encodeURIComponent(username)}`;
+}
+
 function setActiveSearchIndex(nextIndex) {
     if (!globalSearchResults) return;
     const buttons = Array.from(globalSearchResults.querySelectorAll(".search-result-item"));
@@ -143,12 +148,10 @@ function formatMatchDate(value) {
     if (!value) return "-";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return value;
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleDateString("en-US", {
         day: "2-digit",
         month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        year: "numeric"
     });
 }
 
@@ -226,6 +229,19 @@ function formatPostDate(value) {
     });
 }
 
+function formatNotificationDate(value) {
+    if (!value) return "-";
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return value;
+    return dt.toLocaleString("en-US", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
 function buildPostCard(post) {
     const userId = window.HoopAroundLayout?.user?.id;
 
@@ -240,7 +256,20 @@ function buildPostCard(post) {
 
     const meta = document.createElement("div");
     meta.className = "timeline-post-meta";
-    meta.innerHTML = `<strong>@${post.authorUsername}</strong><span class="stadium-card-meta">${formatPostDate(post.createdAt)}</span>`;
+
+    const author = document.createElement("strong");
+    author.textContent = `@${post.authorUsername}`;
+    author.className = "card-link";
+    author.addEventListener("click", (event) => {
+        event.stopPropagation();
+        goToUserProfile(post.authorUsername);
+    });
+
+    const date = document.createElement("span");
+    date.className = "stadium-card-meta";
+    date.textContent = formatPostDate(post.createdAt);
+
+    meta.append(author, date);
 
     const content = document.createElement("p");
     content.className = "timeline-post-content";
@@ -321,6 +350,52 @@ function buildPostCard(post) {
     return article;
 }
 
+function buildFollowedMatchCard(match) {
+    const article = document.createElement("article");
+    article.className = "timeline-post";
+    article.dataset.matchId = String(match.id);
+
+    const meta = document.createElement("div");
+    meta.className = "timeline-post-meta";
+
+    const author = document.createElement("strong");
+    author.textContent = `@${match.username}`;
+    author.className = "card-link";
+    author.addEventListener("click", () => goToUserProfile(match.username));
+
+    const createdAt = document.createElement("span");
+    createdAt.className = "stadium-card-meta";
+    createdAt.textContent = formatPostDate(match.createdAt);
+
+    meta.append(author, createdAt);
+
+    const title = document.createElement("p");
+    title.className = "timeline-post-content";
+    title.textContent = `${match.homeTeam?.name || "Home"} vs ${match.awayTeam?.name || "Away"}`;
+
+    const details = document.createElement("p");
+    details.className = "stadium-card-meta";
+    details.textContent = `${match.stadium?.name || "Unknown stadium"} | Match date: ${formatMatchDate(match.matchAt)}`;
+
+    article.append(meta, title, details);
+
+    if (match.stadiumRating != null) {
+        const rating = document.createElement("p");
+        rating.className = "stadium-card-meta";
+        rating.textContent = `Stadium rating: ${match.stadiumRating}/10`;
+        article.appendChild(rating);
+    }
+
+    if (match.comment) {
+        const comment = document.createElement("p");
+        comment.className = "timeline-post-content";
+        comment.textContent = match.comment;
+        article.appendChild(comment);
+    }
+
+    return article;
+}
+
 async function loadComments(postId, listEl) {
     listEl.innerHTML = '<p class="stadium-card-meta">Loading...</p>';
     try {
@@ -338,7 +413,23 @@ async function loadComments(postId, listEl) {
         comments.forEach((c) => {
             const div = document.createElement("div");
             div.className = "comment-item";
-            div.innerHTML = `<strong>@${c.authorUsername}</strong> <span class="stadium-card-meta">${formatPostDate(c.createdAt)}</span><p>${c.content}</p>`;
+
+            const header = document.createElement("div");
+
+            const author = document.createElement("strong");
+            author.textContent = `@${c.authorUsername}`;
+            author.className = "card-link";
+            author.addEventListener("click", () => goToUserProfile(c.authorUsername));
+
+            const date = document.createElement("span");
+            date.className = "stadium-card-meta";
+            date.textContent = formatPostDate(c.createdAt);
+
+            const content = document.createElement("p");
+            content.textContent = c.content;
+
+            header.append(author, document.createTextNode(" "), date);
+            div.append(header, content);
             listEl.appendChild(div);
         });
     } catch {
@@ -387,21 +478,40 @@ async function loadTimeline() {
     const userId = window.HoopAroundLayout?.user?.id;
 
     try {
-        const url = userId ? `/api/posts?userId=${userId}` : "/api/posts";
-        const response = await fetch(url);
-        if (!response.ok) {
+        const postUrl = userId ? `/api/posts?userId=${userId}` : "/api/posts";
+        const matchUrl = userId ? `/api/users/${userId}/matches/feed` : null;
+
+        const [postResponse, matchResponse] = await Promise.all([
+            fetch(postUrl),
+            matchUrl ? fetch(matchUrl) : Promise.resolve(null)
+        ]);
+
+        if (!postResponse.ok) {
             listEl.innerHTML = '<p class="stadium-card-meta">Timeline could not be loaded.</p>';
             return;
         }
 
-        const posts = await response.json();
-        if (!Array.isArray(posts) || posts.length === 0) {
+        const posts = await postResponse.json();
+        const matches = matchResponse && matchResponse.ok ? await matchResponse.json() : [];
+
+        const timelineItems = [
+            ...(Array.isArray(posts) ? posts.map((post) => ({ type: "post", createdAt: post.createdAt, data: post })) : []),
+            ...(Array.isArray(matches) ? matches.map((match) => ({ type: "match", createdAt: match.createdAt, data: match })) : [])
+        ].toSorted((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        if (timelineItems.length === 0) {
             listEl.innerHTML = '<p class="stadium-card-meta">No posts yet. Be the first to share one.</p>';
             return;
         }
 
         listEl.innerHTML = "";
-        posts.forEach((post) => listEl.appendChild(buildPostCard(post)));
+        timelineItems.forEach((item) => {
+            if (item.type === "match") {
+                listEl.appendChild(buildFollowedMatchCard(item.data));
+                return;
+            }
+            listEl.appendChild(buildPostCard(item.data));
+        });
     } catch {
         listEl.innerHTML = '<p class="stadium-card-meta">Timeline could not be loaded.</p>';
     }
@@ -570,38 +680,37 @@ async function loadNotifications() {
     if (!userId || !listEl) return;
 
     try {
-        const response = await fetch(`/api/chats/${userId}`);
+        const response = await fetch(`/api/users/${userId}/notifications?unreadOnly=true`);
         if (!response.ok) {
             listEl.innerHTML = '<p class="stadium-card-meta">Notifications could not be loaded.</p>';
             return;
         }
 
-        const summaries = await response.json();
-        const unread = (Array.isArray(summaries) ? summaries : []).filter((s) => s.unreadCount > 0);
+        const notifications = await response.json();
 
-        if (unread.length === 0) {
-            listEl.innerHTML = '<p class="stadium-card-meta">No unread messages.</p>';
+        if (!Array.isArray(notifications) || notifications.length === 0) {
+            listEl.innerHTML = '<p class="stadium-card-meta">No notifications yet.</p>';
             return;
         }
 
         listEl.innerHTML = "";
-        unread.forEach((s) => {
-            const item = document.createElement("a");
-            item.href = `/chat.html?username=${encodeURIComponent(s.otherUsername)}`;
+        notifications.forEach((notification) => {
+            const item = document.createElement("div");
             item.className = "notification-item";
 
             const name = document.createElement("strong");
-            name.textContent = `@${s.otherUsername}`;
+            name.textContent = `@${notification.username || "unknown"}`;
 
-            const badge = document.createElement("span");
-            badge.className = "notification-badge";
-            badge.textContent = String(s.unreadCount);
+            const meta = document.createElement("span");
+            meta.className = "stadium-card-meta";
+            meta.textContent = formatNotificationDate(notification.createdAt);
 
             const preview = document.createElement("p");
             preview.className = "stadium-card-meta";
-            preview.textContent = s.lastMessage || "";
+            preview.textContent = notification.message || "";
 
-            item.append(name, badge, preview);
+            item.append(name, meta, preview);
+
             listEl.appendChild(item);
         });
     } catch {
@@ -609,12 +718,23 @@ async function loadNotifications() {
     }
 }
 
+function initNotificationsCard() {
+    const notificationsCard = document.getElementById("notificationsCard");
+    if (!notificationsCard) return;
+    notificationsCard.addEventListener("click", () => {
+        window.location.href = "/notifications.html";
+    });
+}
+
 function openPostDetail(post) {
     const userId = window.HoopAroundLayout?.user?.id;
     const overlay = document.getElementById("postDetailOverlay");
     if (!overlay) return;
 
-    document.getElementById("postDetailAuthor").textContent = `@${post.authorUsername}`;
+    const postDetailAuthor = document.getElementById("postDetailAuthor");
+    postDetailAuthor.textContent = `@${post.authorUsername}`;
+    postDetailAuthor.classList.add("card-link");
+    postDetailAuthor.onclick = () => goToUserProfile(post.authorUsername);
     document.getElementById("postDetailDate").textContent = formatPostDate(post.createdAt);
     document.getElementById("postDetailContent").textContent = post.content;
 
@@ -730,4 +850,5 @@ if (window.HoopAroundLayout?.user) {
     initFab();
     initPostDetailModal();
     initLightbox();
+    initNotificationsCard();
 }

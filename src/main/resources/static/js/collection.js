@@ -16,12 +16,10 @@ function formatMatchAt(matchAt) {
     if (!matchAt) return "-";
     const dt = new Date(matchAt);
     if (Number.isNaN(dt.getTime())) return matchAt;
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleDateString("en-US", {
         day: "2-digit",
         month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+        year: "numeric"
     });
 }
 

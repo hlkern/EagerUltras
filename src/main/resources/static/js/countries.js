@@ -1,6 +1,8 @@
 const countryList = document.getElementById("countryList");
 const stadiumDetail = document.getElementById("stadiumDetail");
+const countrySearchInput = document.getElementById("countrySearchInput");
 let activeStadiumRow = null;
+let allCountries = [];
 
 const requestedCountrySlug = new URLSearchParams(window.location.search).get("countrySlug");
 
@@ -41,6 +43,13 @@ function groupByCountry(stadiums) {
     });
 
     return Array.from(map.values()).toSorted((a, b) => a.name.localeCompare(b.name));
+}
+
+function normalizeSearch(value) {
+    return String(value || "")
+        .toLocaleLowerCase("en-US")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 function teamNames(stadium) {
@@ -115,7 +124,7 @@ function createCountryItem(country, isOpen) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "country-toggle";
-    button.innerHTML = `<span>${country.name}</span><span class="country-meta">${country.code} | ${country.stadiums.length} stadium</span>`;
+    button.innerHTML = `<span>${country.name}</span><span class="country-meta">${country.code} | ${country.stadiums.length} ${country.stadiums.length === 1 ? "stadium" : "stadiums"}</span>`;
 
     const list = document.createElement("div");
     list.className = "stadium-list";
@@ -129,6 +138,64 @@ function createCountryItem(country, isOpen) {
 
     wrapper.append(button, list);
     return wrapper;
+}
+
+function filterCountries(countries, query) {
+    const normalizedQuery = normalizeSearch(query);
+    if (!normalizedQuery) return countries;
+
+    return countries
+        .map((country) => {
+            const matchesCountry = normalizeSearch(country.name).includes(normalizedQuery)
+                || normalizeSearch(country.code).includes(normalizedQuery);
+            const matchingStadiums = country.stadiums.filter((stadium) => {
+                const haystack = [
+                    stadium.name,
+                    stadium.city,
+                    stadium.country?.name,
+                    ...(stadium.teams || []).map((team) => team?.name)
+                ].map(normalizeSearch).join(" ");
+                return haystack.includes(normalizedQuery);
+            });
+
+            if (matchesCountry) {
+                return country;
+            }
+
+            if (matchingStadiums.length === 0) {
+                return null;
+            }
+
+            return { ...country, stadiums: matchingStadiums };
+        })
+        .filter(Boolean);
+}
+
+function renderCountries() {
+    if (!countryList) return;
+
+    const filteredCountries = filterCountries(allCountries, countrySearchInput?.value || "");
+    countryList.innerHTML = "";
+
+    if (filteredCountries.length === 0) {
+        countryList.innerHTML = '<div class="empty">No countries or stadiums matched your search.</div>';
+        return;
+    }
+
+    let requestedElement = null;
+
+    filteredCountries.forEach((country, index) => {
+        const isRequested = requestedCountrySlug && toSlug(country.name) === requestedCountrySlug;
+        const item = createCountryItem(country, isRequested || (!requestedCountrySlug && index === 0));
+        if (isRequested) {
+            requestedElement = item;
+        }
+        countryList.appendChild(item);
+    });
+
+    if (requestedElement) {
+        requestedElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
 }
 
 async function loadCountries() {
@@ -150,26 +217,18 @@ async function loadCountries() {
             return;
         }
 
-        const countries = groupByCountry(data);
-        countryList.innerHTML = "";
-
-        let requestedElement = null;
-
-        countries.forEach((country, index) => {
-            const isRequested = requestedCountrySlug && toSlug(country.name) === requestedCountrySlug;
-            const item = createCountryItem(country, isRequested || (!requestedCountrySlug && index === 0));
-            if (isRequested) {
-                requestedElement = item;
-            }
-            countryList.appendChild(item);
-        });
-
-        if (requestedElement) {
-            requestedElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
+        allCountries = groupByCountry(data);
+        renderCountries();
     } catch (error) {
         countryList.innerHTML = `<div class="error">${error.message || "Unexpected error"}</div>`;
     }
+}
+
+if (countrySearchInput) {
+    countrySearchInput.addEventListener("input", () => {
+        activeStadiumRow = null;
+        renderCountries();
+    });
 }
 
 if (window.HoopAroundLayout?.user) {
