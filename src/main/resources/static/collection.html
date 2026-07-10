@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 </head>
 <body data-page="collection">
 <div id="sidebarOverlay" class="sidebar-overlay"></div>
@@ -36,6 +37,7 @@
                 <button type="button" data-language-button="en" data-i18n="action_en">EN</button>
                 <button type="button" data-language-button="tr" data-i18n="action_tr">TR</button>
             </div>
+            <button id="collectionShareBtn" class="ghost" type="button" data-i18n="collection_share">Share collection</button>
             <button id="logoutBtn" class="ghost" type="button" data-i18n="action_logout">Logout</button>
         </div>
     </header>
@@ -56,7 +58,14 @@
         <p id="stadiumSummaryInfo" class="stadium-card-meta">Loading...</p>
         <div id="stadiumSummaryList" class="cards-grid"></div>
     </section>
+
+    <section class="placeholder-card">
+        <h3 data-i18n="collection_map_title">My Map</h3>
+        <p id="collectionMapInfo" class="stadium-card-meta" data-i18n="collection_map_desc">A personalized map showing only visited stadiums.</p>
+        <div id="collectionMap" class="collection-map"></div>
+    </section>
 </main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/layout.js"></script>
 <script src="/js/collection.js"></script>

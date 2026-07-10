@@ -10,11 +10,10 @@ const mapInfo = document.getElementById("mapInfo");
 const COLORS = {
     visited: { fill: "#ff7a18", stroke: "#ffb347" },
     wishlist: { fill: "#7ab8ff", stroke: "#a0d0ff" },
-    other: { fill: "#4a5280", stroke: "#6370a8" }
+    other: { fill: "#6d7280", stroke: "#a7acb8" }
 };
 
 let allMarkers = [];
-let activeFilter = "all";
 let wishlistIds = new Set();
 
 function t(key, vars = {}) {
@@ -29,11 +28,12 @@ function markerType(stadiumId, visitedSet, wishlistSet) {
 
 function buildMarkerIcon(type) {
     const color = COLORS[type] || COLORS.other;
+    const mutedStyle = type === "other" ? "opacity:0.5;" : "";
     return L.divIcon({
         className: "stadium-emoji-marker-wrap",
         html: `
-            <div class="stadium-emoji-marker" style="background:${color.fill}; border-color:${color.stroke};">
-                <span>🏟️</span>
+            <div class="stadium-emoji-marker" style="background:${color.fill}; border-color:${color.stroke}; ${mutedStyle}">
+                <span>&#127967;&#65039;</span>
             </div>
         `,
         iconSize: [28, 28],
@@ -80,7 +80,6 @@ function makeMarker(stadium, type) {
 }
 
 function applyFilter(filter) {
-    activeFilter = filter;
     allMarkers.forEach(({ marker, type }) => {
         if (filter === "all" || filter === type) {
             map.addLayer(marker);
@@ -122,10 +121,10 @@ async function loadMap() {
             const marker = makeMarker(stadium, type);
             if (marker) marker.addTo(map);
             return { marker, type, stadium };
-        }).filter((marker) => marker.marker);
+        }).filter((item) => item.marker);
 
-        const visitedCount = allMarkers.filter((marker) => marker.type === "visited").length;
-        const wishlistCount = allMarkers.filter((marker) => marker.type === "wishlist").length;
+        const visitedCount = allMarkers.filter((item) => item.type === "visited").length;
+        const wishlistCount = allMarkers.filter((item) => item.type === "wishlist").length;
         const totalCount = allMarkers.length;
 
         if (mapInfo) {
@@ -137,9 +136,9 @@ async function loadMap() {
         }
 
         allMarkers
-            .filter((marker) => marker.type !== "other")
-            .forEach((marker) => marker.marker.setZIndexOffset(1000));
-    } catch (err) {
+            .filter((item) => item.type !== "other")
+            .forEach((item) => item.marker.setZIndexOffset(1000));
+    } catch {
         if (mapInfo) mapInfo.textContent = t("map_map_error");
     }
 }
@@ -173,7 +172,7 @@ async function loadStadiumModalData(stadiumId) {
     try {
         const [stadResp, insightsResp] = await Promise.all([
             fetch(`/api/stadiums/${stadiumId}`),
-            fetch(`/api/stadiums/${stadiumId}/insights${userId ? "?viewerUserId=" + userId : ""}`)
+            fetch(`/api/stadiums/${stadiumId}/insights${userId ? `?viewerUserId=${userId}` : ""}`)
         ]);
         const stadium = stadResp.ok ? await stadResp.json() : null;
         const insights = insightsResp.ok ? await insightsResp.json() : {};
@@ -183,9 +182,8 @@ async function loadStadiumModalData(stadiumId) {
             return;
         }
 
-        const marker = allMarkers.find((item) => item.stadium.id === stadiumId);
-        const type = marker?.type || "other";
-
+        const markerEntry = allMarkers.find((item) => item.stadium.id === stadiumId);
+        const type = markerEntry?.type || "other";
         const teams = (stadium.teams || []).map((team) => team.name).filter(Boolean).join(", ") || "-";
         const avg = Number(insights?.averageRating || 0);
         const rCount = insights?.ratingCount || 0;
@@ -203,7 +201,8 @@ async function loadStadiumModalData(stadiumId) {
                 <div class="sm-comment-item">
                     <p class="sm-comment-text">${escHtml(comment.comment || "")}</p>
                     <p class="sm-comment-meta">${escHtml(comment.username || "?")} | Rating: ${comment.rating ?? "-"} | ${formatDate(comment.matchAt)}</p>
-                </div>`).join("");
+                </div>
+            `).join("");
 
         content.innerHTML = `
             <h2>${escHtml(stadium.name || "Stadium")}</h2>
@@ -213,9 +212,9 @@ async function loadStadiumModalData(stadiumId) {
                 <div><span>${t("detail_teams")}</span><strong>${escHtml(teams)}</strong></div>
                 <div><span>${t("map_capacity")}</span><strong>${stadium.capacity ?? "-"}</strong></div>
                 <div><span>${t("map_avg_rating")}</span><strong>${avg.toFixed(1)} (${rCount})</strong></div>
-                <div><span>${t("detail_location")}</span><strong>${stadium.latitude != null ? stadium.latitude.toFixed(4) + ", " + stadium.longitude.toFixed(4) : "-"}</strong></div>
+                <div><span>${t("detail_location")}</span><strong>${stadium.latitude != null ? `${stadium.latitude.toFixed(4)}, ${stadium.longitude.toFixed(4)}` : "-"}</strong></div>
             </div>
-            ${type !== "visited" ? `<div id="smWishlistRow"></div>` : ""}
+            ${type !== "visited" ? '<div id="smWishlistRow"></div>' : ""}
             <p class="sm-comments-title">${t("map_visitor_comments")}</p>
             ${commentsHtml}
             <a class="sm-full-link" href="/stadium-detail.html?stadiumId=${stadium.id}">${t("map_view_full_page")}</a>
@@ -224,7 +223,7 @@ async function loadStadiumModalData(stadiumId) {
         if (type !== "visited") {
             renderWishlistBtn(stadiumId, type === "wishlist");
         }
-    } catch (err) {
+    } catch {
         content.innerHTML = `<p style="color:#f87;text-align:center;padding:20px 0;">${t("map_data_error")}</p>`;
     }
 }
@@ -248,18 +247,17 @@ function renderWishlistBtn(stadiumId, inWishlist) {
             const resp = await fetch(`/api/user-wishlist/${userId}/${stadiumId}`, { method });
             if (resp.ok || resp.status === 204) {
                 inWishlist = !inWishlist;
-
-                const marker = allMarkers.find((item) => item.stadium.id === stadiumId);
-                if (marker) {
+                const markerEntry = allMarkers.find((item) => item.stadium.id === stadiumId);
+                if (markerEntry) {
                     if (inWishlist) {
                         wishlistIds.add(stadiumId);
-                        marker.type = "wishlist";
+                        markerEntry.type = "wishlist";
                     } else {
                         wishlistIds.delete(stadiumId);
-                        marker.type = "other";
+                        markerEntry.type = "other";
                     }
-                    marker.marker.setIcon(buildMarkerIcon(marker.type));
-                    marker.marker.setZIndexOffset(marker.type === "other" ? 0 : 1000);
+                    markerEntry.marker.setIcon(buildMarkerIcon(markerEntry.type));
+                    markerEntry.marker.setZIndexOffset(markerEntry.type === "other" ? 0 : 1000);
                 }
 
                 btn.textContent = inWishlist ? t("map_remove_wishlist") : t("map_add_wishlist");

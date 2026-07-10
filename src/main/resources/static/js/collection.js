@@ -4,19 +4,43 @@ const teamSummaryInfo = document.getElementById("teamSummaryInfo");
 const teamSummaryList = document.getElementById("teamSummaryList");
 const stadiumSummaryInfo = document.getElementById("stadiumSummaryInfo");
 const stadiumSummaryList = document.getElementById("stadiumSummaryList");
+const collectionShareBtn = document.getElementById("collectionShareBtn");
+const collectionMapInfo = document.getElementById("collectionMapInfo");
+const collectionMapEl = document.getElementById("collectionMap");
 
 let collectionState = [];
 let activeEditMatchId = null;
+let collectionMap = null;
+let collectionMapMarkers = [];
+let collectionOwner = null;
+
+function t(key, vars = {}) {
+    return window.HoopAroundI18n?.t?.(key, vars) ?? key;
+}
 
 function getCurrentUserId() {
     return window.HoopAroundLayout?.user?.id ?? null;
+}
+
+function getCurrentUsername() {
+    return window.HoopAroundLayout?.user?.username ?? "";
+}
+
+function getViewedUsername() {
+    return new URLSearchParams(window.location.search).get("username");
+}
+
+function isOwnCollection() {
+    const viewedUsername = getViewedUsername();
+    const currentUsername = getCurrentUsername();
+    return !viewedUsername || (currentUsername && viewedUsername.toLowerCase() === currentUsername.toLowerCase());
 }
 
 function formatMatchAt(matchAt) {
     if (!matchAt) return "-";
     const dt = new Date(matchAt);
     if (Number.isNaN(dt.getTime())) return matchAt;
-    return dt.toLocaleDateString("en-US", {
+    return dt.toLocaleDateString(window.HoopAroundI18n?.getLocale?.() || "en-US", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric"
@@ -49,6 +73,118 @@ function createSummaryCard(titleText, count, latestYear) {
     return card;
 }
 
+function createCollectionMarker() {
+    return L.divIcon({
+        className: "collection-marker-wrap",
+        html: '<div class="collection-marker">🏟️</div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+    });
+}
+
+function ensureCollectionMap() {
+    if (!collectionMapEl || collectionMap) return collectionMap;
+    collectionMap = L.map(collectionMapEl).setView([39.5, 35.0], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(collectionMap);
+    return collectionMap;
+}
+
+function renderCollectionMap(matches) {
+    if (!collectionMapEl || !collectionMapInfo) return;
+
+    const map = ensureCollectionMap();
+    collectionMapMarkers.forEach((marker) => map.removeLayer(marker));
+    collectionMapMarkers = [];
+
+    const uniqueVisited = new Map();
+    (Array.isArray(matches) ? matches : []).forEach((match) => {
+        const stadium = match?.stadium;
+        if (!stadium?.id || stadium.latitude == null || stadium.longitude == null) return;
+        if (!uniqueVisited.has(stadium.id)) {
+            uniqueVisited.set(stadium.id, stadium);
+        }
+    });
+
+    const visitedStadiums = Array.from(uniqueVisited.values());
+    if (visitedStadiums.length === 0) {
+        collectionMapInfo.textContent = t("collection_map_empty");
+        return;
+    }
+
+    const bounds = [];
+    visitedStadiums.forEach((stadium) => {
+        const marker = L.marker([stadium.latitude, stadium.longitude], {
+            icon: createCollectionMarker(),
+            keyboard: true
+        });
+        marker.bindPopup(`
+            <div style="min-width:160px;font-family:Inter,sans-serif;font-size:13px;">
+                <strong style="font-size:14px;">${stadium.name || "Stadium"}</strong><br/>
+                <span style="color:#888;">${stadium.city || ""}${stadium.country?.name ? " | " + stadium.country.name : ""}</span>
+            </div>
+        `);
+        marker.on("click", () => {
+            map.flyTo([stadium.latitude, stadium.longitude], 14, {
+                animate: true,
+                duration: 0.8
+            });
+        });
+        marker.addTo(map);
+        collectionMapMarkers.push(marker);
+        bounds.push([stadium.latitude, stadium.longitude]);
+    });
+
+    collectionMapInfo.textContent = `${visitedStadiums.length} stadiums on this personal map.`;
+    if (bounds.length === 1) {
+        map.setView(bounds[0], 12);
+    } else {
+        map.fitBounds(bounds, { padding: [24, 24] });
+    }
+    window.setTimeout(() => map.invalidateSize(), 0);
+}
+
+function updateCollectionHeading() {
+    const pageTitle = document.querySelector(".topbar-left h1");
+    if (!pageTitle) return;
+
+    if (collectionOwner?.username && !isOwnCollection()) {
+        if (window.HoopAroundI18n?.getLanguage?.() === "tr") {
+            pageTitle.textContent = `${collectionOwner.username}${t("collection_public_suffix")}`;
+        } else {
+            pageTitle.textContent = `${collectionOwner.username}${t("collection_public_suffix")}`;
+        }
+        return;
+    }
+
+    pageTitle.textContent = t("collection_title");
+}
+
+function setupShareButton() {
+    if (!collectionShareBtn) return;
+
+    if (!collectionOwner?.username) {
+        collectionShareBtn.classList.add("hidden");
+        return;
+    }
+
+    collectionShareBtn.classList.remove("hidden");
+    collectionShareBtn.onclick = async () => {
+        const shareUrl = new URL("/collection.html", window.location.origin);
+        shareUrl.searchParams.set("username", collectionOwner.username);
+
+        try {
+            await navigator.clipboard.writeText(String(shareUrl));
+            if (collectionInfo) collectionInfo.textContent = t("collection_share_done");
+        } catch {
+            if (collectionInfo) collectionInfo.textContent = `${t("collection_share_fail")} ${shareUrl}`;
+        }
+    };
+}
+
 function closeEditModal() {
     const overlay = document.getElementById("matchEditOverlay");
     if (overlay) {
@@ -58,6 +194,8 @@ function closeEditModal() {
 }
 
 function openEditModal(match) {
+    if (!isOwnCollection()) return;
+
     closeEditModal();
 
     const overlay = document.createElement("div");
@@ -206,6 +344,12 @@ function createMatchCard(match) {
     line4.className = "stadium-card-meta";
     line4.textContent = `Comment: ${match.comment || "-"}`;
 
+    card.append(title, line1, line2, line3, line4);
+
+    if (!isOwnCollection()) {
+        return card;
+    }
+
     const status = document.createElement("p");
     status.className = "stadium-card-meta";
 
@@ -258,7 +402,7 @@ function createMatchCard(match) {
         }
     });
 
-    card.append(title, line1, line2, line3, line4, actionRow, status);
+    card.append(actionRow, status);
     return card;
 }
 
@@ -343,11 +487,12 @@ function renderCollection(matches) {
     collectionList.innerHTML = "";
 
     if (!Array.isArray(matches) || matches.length === 0) {
-        collectionInfo.textContent = "Your match collection is empty.";
+        collectionInfo.textContent = isOwnCollection() ? "Your match collection is empty." : "This collection is empty.";
         if (teamSummaryInfo) teamSummaryInfo.textContent = "No team summary.";
         if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "No stadium summary.";
         if (teamSummaryList) teamSummaryList.innerHTML = "";
         if (stadiumSummaryList) stadiumSummaryList.innerHTML = "";
+        renderCollectionMap([]);
         return;
     }
 
@@ -356,45 +501,64 @@ function renderCollection(matches) {
 
     renderTeamSummary(matches);
     renderStadiumSummary(matches);
+    renderCollectionMap(matches);
+}
+
+async function loadOwnCollection() {
+    const userId = getCurrentUserId();
+    if (!userId) {
+        const message = "User information could not be found.";
+        collectionInfo.textContent = message;
+        if (teamSummaryInfo) teamSummaryInfo.textContent = message;
+        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
+        return;
+    }
+
+    collectionOwner = { username: getCurrentUsername() };
+    const response = await fetch(`/api/users/${userId}/matches`);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || "The match collection could not be loaded.");
+    }
+
+    return Array.isArray(data) ? data : [];
+}
+
+async function loadPublicCollection(username) {
+    const viewerUserId = getCurrentUserId();
+    const query = viewerUserId ? `?viewerUserId=${encodeURIComponent(viewerUserId)}` : "";
+    const response = await fetch(`/api/public/users/${encodeURIComponent(username)}${query}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data?.message || data?.error || "The collection could not be loaded.");
+    }
+
+    collectionOwner = { username: data?.username || username };
+    return Array.isArray(data?.matches) ? data.matches : [];
 }
 
 async function loadCollection() {
     if (!collectionList || !collectionInfo) return;
-
-    const userId = getCurrentUserId();
-    if (!userId) {
-        collectionInfo.textContent = "User information could not be found.";
-        if (teamSummaryInfo) teamSummaryInfo.textContent = "User information could not be found.";
-        if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "User information could not be found.";
-        return;
-    }
 
     collectionInfo.textContent = "Loading...";
     if (teamSummaryInfo) teamSummaryInfo.textContent = "Loading...";
     if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = "Loading...";
 
     try {
-        const response = await fetch(`/api/users/${userId}/matches`);
-        const data = await response.json();
-
-        if (!response.ok) {
-            const message = data?.message || data?.error || "The match collection could not be loaded.";
-            collectionInfo.textContent = message;
-            if (teamSummaryInfo) teamSummaryInfo.textContent = message;
-            if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
-            return;
-        }
-
-        collectionState = Array.isArray(data) ? data : [];
+        const viewedUsername = getViewedUsername();
+        collectionState = viewedUsername ? await loadPublicCollection(viewedUsername) : await loadOwnCollection();
+        updateCollectionHeading();
+        setupShareButton();
         renderCollection(collectionState);
     } catch (error) {
         const message = error.message || "The match collection could not be loaded.";
         collectionInfo.textContent = message;
         if (teamSummaryInfo) teamSummaryInfo.textContent = message;
         if (stadiumSummaryInfo) stadiumSummaryInfo.textContent = message;
+        if (collectionMapInfo) collectionMapInfo.textContent = message;
     }
 }
 
-if (window.HoopAroundLayout?.user) {
-    loadCollection();
-}
+loadCollection();

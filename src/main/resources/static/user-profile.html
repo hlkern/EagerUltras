@@ -40,7 +40,7 @@
             </button>
             <div>
                 <p class="tiny">EagerUltras</p>
-                <h1 id="profileTitle" data-i18n="profile_title">User profile</h1>
+                <h1 id="profileTitle"></h1>
             </div>
         </div>
         <div class="topbar-actions">
@@ -97,12 +97,26 @@
         <div id="profileWishlist" class="cards-grid"></div>
     </section>
 
+    <section class="card">
+        <div class="section-head">
+            <h3 data-i18n="profile_collection">Collection</h3>
+            <p data-i18n="profile_collection_desc">See this user's full collection and visited stadium map.</p>
+        </div>
+        <div id="profileCollectionStats" class="cards-grid"></div>
+        <div class="profile-collection-actions">
+            <button id="profileCollectionBtn" class="ghost" type="button" data-i18n="profile_open_collection">Open full collection</button>
+        </div>
+        <div id="profileCollectionMapInfo" class="stadium-card-meta" data-i18n="profile_collection_map">Visited stadium map</div>
+        <div id="profileCollectionMap" class="collection-map collection-map--compact"></div>
+    </section>
+
     <section id="profileError" class="card hidden">
         <h3 data-i18n="profile_not_found">User not found</h3>
         <p data-i18n="profile_not_found_desc">This profile could not be reached.</p>
     </section>
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/layout.js"></script>
 <script src="/js/user-profile.js"></script>

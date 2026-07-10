@@ -655,6 +655,10 @@ p {
     gap: 6px;
 }
 
+.profile-collection-actions {
+    margin: 12px 0;
+}
+
 .profile-stats {
     margin-top: 12px;
     display: grid;
@@ -678,6 +682,37 @@ p {
 
 .profile-stat-box strong {
     font-size: 20px;
+}
+
+.collection-map {
+    width: 100%;
+    height: 360px;
+    margin-top: 10px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+
+.collection-map--compact {
+    height: 300px;
+}
+
+.collection-marker-wrap {
+    background: transparent;
+    border: 0;
+}
+
+.collection-marker {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #ff7a18;
+    border: 2px solid #ffb347;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+    font-size: 16px;
+    line-height: 1;
 }
 
 .chat-new-row {
